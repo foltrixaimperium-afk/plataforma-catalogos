@@ -1,0 +1,426 @@
+/* ═══════════════════════════════════════════════════════════════
+   Estilos del catálogo público. Salen tal cual de la plantilla que
+   ya venías usando (referencia/creador de catalogo 2.1.html).
+
+   Dos cambios respecto del original:
+   · Todo cuelga de .catalogo, para no chocar con los estilos del panel.
+   · Los colores de cada tienda entran como variables desde React,
+     en vez de escribirse dentro del archivo.
+   ═══════════════════════════════════════════════════════════════ */
+
+.catalogo{
+  --tinta:#241A2B;
+  --suave:#6E6377;
+  --tarjeta:#FFFFFF;
+  --verde:#0F7A6C;
+  --verde-oscuro:#0B5D52;
+  --borde:#D9E6EE;
+
+  background:var(--fondo);
+  color:var(--tinta);
+  font-family:'DM Sans',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+  padding-bottom:120px;
+}
+
+.catalogo .envoltorio{max-width:1100px;margin:0 auto;padding:0 16px}
+
+/* ---------- Cabecera ---------- */
+.catalogo .cabecera{
+  background:var(--vino);
+  color:#fff;
+  padding:34px 0 30px;
+  border-bottom-left-radius:26px;
+  border-bottom-right-radius:26px;
+}
+.catalogo .marca-fila{display:flex;align-items:center;gap:14px}
+.catalogo .logo{
+  flex:0 0 auto;
+  width:62px;height:62px;
+  border-radius:14px;
+  background:#fff;
+  object-fit:contain;
+  padding:5px;
+}
+.catalogo .marca{
+  font-family:'Fraunces',Georgia,serif;
+  font-size:clamp(30px,9vw,52px);
+  font-weight:600;
+  letter-spacing:-0.02em;
+  line-height:1;
+  min-width:0;
+}
+.catalogo .lema{
+  margin-top:10px;
+  font-size:15px;
+  line-height:1.5;
+  color:var(--color-lema);
+  max-width:34ch;
+}
+.catalogo .datos{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
+.catalogo .dato{
+  font-size:12.5px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.22);
+  padding:6px 11px;
+  border-radius:100px;
+}
+
+/* ---------- Buscador ---------- */
+.catalogo .buscador{
+  max-width:1100px;
+  margin:0 auto;
+  padding:20px 16px 0;
+  position:relative;
+}
+.catalogo .buscador input{
+  width:100%;
+  font-family:'DM Sans',sans-serif;
+  font-size:16px;
+  color:var(--tinta);
+  background:#fff;
+  border:1px solid var(--borde);
+  border-radius:100px;
+  padding:12px 42px 12px 18px;
+}
+.catalogo .buscador input:focus{outline:2px solid var(--vino);outline-offset:1px;border-color:var(--vino)}
+.catalogo .buscador-borrar{
+  position:absolute;
+  right:26px;top:50%;
+  transform:translateY(-25%);
+  width:26px;height:26px;
+  border:none;
+  border-radius:50%;
+  background:var(--vino-claro);
+  color:var(--tinta);
+  font-size:16px;line-height:1;
+  cursor:pointer;
+}
+
+/* ---------- Filtros ---------- */
+.catalogo .filtros{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:16px 16px 4px;
+  max-width:1100px;
+  margin:0 auto;
+  scrollbar-width:none;
+}
+.catalogo .filtros::-webkit-scrollbar{display:none}
+.catalogo .filtro{
+  flex:0 0 auto;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  font-weight:500;
+  color:var(--suave);
+  background:transparent;
+  border:1px solid var(--borde);
+  border-radius:100px;
+  padding:9px 16px;
+  cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.catalogo .filtro:hover{border-color:var(--vino);color:var(--vino)}
+.catalogo .filtro[aria-pressed="true"]{background:var(--tinta);border-color:var(--tinta);color:#fff}
+.catalogo .filtro:focus-visible{outline:2px solid var(--vino);outline-offset:2px}
+
+/* ---------- Rejilla ---------- */
+.catalogo .rejilla{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+  padding:18px 0 40px;
+}
+@media(min-width:700px){.catalogo .rejilla{grid-template-columns:repeat(3,1fr);gap:20px}}
+@media(min-width:980px){.catalogo .rejilla{grid-template-columns:repeat(4,1fr)}}
+
+.catalogo .sin-resultados{
+  padding:50px 16px;
+  text-align:center;
+  color:var(--suave);
+  font-size:14.5px;
+  line-height:1.6;
+}
+
+.catalogo .articulo{
+  background:var(--tarjeta);
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  border:1px solid var(--borde);
+}
+
+.catalogo .lienzo{
+  position:relative;
+  aspect-ratio:3/4;
+  background:var(--vino-claro);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.catalogo .lienzo img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.catalogo .lienzo svg{width:52%;height:52%;opacity:.5}
+
+/* Agotado: la foto se apaga y aparece el cartel. */
+.catalogo .articulo.agotado .lienzo img{filter:grayscale(1);opacity:.55}
+.catalogo .cartel-agotado{
+  position:absolute;
+  top:10px;left:10px;
+  background:var(--tinta);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  padding:5px 10px;
+  border-radius:100px;
+}
+
+/* ---------- Galería de fotos ---------- */
+.catalogo .galeria-flecha{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:28px;height:28px;
+  padding:0;
+  border:none;
+  border-radius:50%;
+  background:rgba(36,26,43,.5);
+  color:#fff;
+  font-size:18px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:background .15s;
+}
+.catalogo .galeria-flecha:hover{background:rgba(36,26,43,.85)}
+.catalogo .galeria-flecha:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.catalogo .galeria-flecha.atras{left:8px}
+.catalogo .galeria-flecha.adelante{right:8px}
+.catalogo .galeria-puntos{
+  position:absolute;
+  bottom:8px;left:0;right:0;
+  display:flex;justify-content:center;gap:5px;
+}
+.catalogo .punto{
+  width:6px;height:6px;
+  padding:0;border:none;border-radius:50%;
+  background:rgba(255,255,255,.55);
+  box-shadow:0 0 0 1px rgba(36,26,43,.25);
+  cursor:pointer;
+}
+.catalogo .punto[aria-pressed="true"]{background:#fff}
+.catalogo .punto:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+/* ---------- Cuerpo de la tarjeta ---------- */
+.catalogo .cuerpo{padding:12px 12px 14px;display:flex;flex-direction:column;gap:9px;flex:1}
+.catalogo .nombre{
+  font-family:'Fraunces',Georgia,serif;
+  font-size:16px;
+  font-weight:400;
+  line-height:1.25;
+}
+.catalogo .detalle{font-size:12.5px;color:var(--suave);line-height:1.45}
+.catalogo .precio{
+  font-family:'DM Mono',monospace;
+  font-size:16px;
+  font-weight:500;
+  letter-spacing:-0.02em;
+}
+
+.catalogo .acciones{margin-top:auto;display:flex;flex-direction:column;gap:6px}
+.catalogo .anadir{
+  width:100%;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  color:#fff;
+  background:var(--verde);
+  border:none;
+  border-radius:10px;
+  padding:11px;
+  cursor:pointer;
+  transition:background .15s;
+}
+.catalogo .anadir:hover{background:var(--verde-oscuro)}
+.catalogo .anadir:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}
+.catalogo .anadir.puesto{background:var(--tinta)}
+.catalogo .sin-stock{
+  width:100%;
+  text-align:center;
+  font-size:13px;
+  font-weight:700;
+  color:var(--suave);
+  background:var(--vino-claro);
+  border-radius:10px;
+  padding:11px;
+}
+.catalogo .preguntar{
+  text-align:center;
+  font-size:12.5px;
+  color:var(--suave);
+  text-decoration:none;
+  padding:3px;
+  border-radius:6px;
+}
+.catalogo .preguntar:hover{color:var(--vino);text-decoration:underline}
+.catalogo .preguntar:focus-visible{outline:2px solid var(--vino);outline-offset:2px}
+
+/* ---------- Selector de cantidad ---------- */
+.catalogo .cantidad{
+  display:flex;align-items:center;justify-content:center;gap:14px;
+  border:1px solid var(--borde);
+  border-radius:10px;
+  padding:5px;
+}
+.catalogo .cantidad-boton{
+  width:28px;height:28px;
+  padding:0;border:none;border-radius:7px;
+  background:var(--vino-claro);
+  color:var(--tinta);
+  font-size:17px;line-height:1;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.catalogo .cantidad-boton:hover{background:var(--vino);color:#fff}
+.catalogo .cantidad-boton:focus-visible{outline:2px solid var(--vino);outline-offset:2px}
+.catalogo .cantidad-numero{
+  font-family:'DM Mono',monospace;
+  font-size:15px;
+  min-width:2ch;
+  text-align:center;
+}
+
+/* ---------- Visor de foto ampliada ---------- */
+.catalogo .visor{
+  position:fixed;
+  inset:0;
+  background:rgba(18,26,32,.94);
+  z-index:40;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+.catalogo .visor img{
+  max-width:min(92vw,720px);
+  max-height:80vh;
+  width:auto;height:auto;
+  object-fit:contain;
+  border-radius:10px;
+  display:block;
+}
+.catalogo .visor-boton{
+  position:absolute;
+  border:none;
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  padding:0;
+  transition:background .15s;
+}
+.catalogo .visor-boton:hover{background:rgba(255,255,255,.34)}
+.catalogo .visor-boton:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.catalogo .visor-cerrar{top:14px;right:14px;width:40px;height:40px;border-radius:50%;font-size:26px;line-height:1}
+.catalogo .visor-flecha{top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;font-size:26px;line-height:1}
+.catalogo .visor-flecha.atras{left:14px}
+.catalogo .visor-flecha.adelante{right:14px}
+.catalogo .visor-pie{
+  position:absolute;
+  left:0;right:0;bottom:22px;
+  text-align:center;
+  color:#fff;
+  font-size:13.5px;
+  line-height:1.5;
+  padding:0 60px;
+  pointer-events:none;
+}
+.catalogo .visor-contador{
+  display:block;
+  font-family:'DM Mono',monospace;
+  font-size:12px;
+  color:rgba(255,255,255,.65);
+  margin-top:3px;
+}
+
+/* ---------- Botones de contacto ---------- */
+.catalogo .contacto{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:10px;
+  padding:0 16px 40px;
+}
+.catalogo .contacto-boton{
+  display:flex;align-items:center;gap:9px;
+  font-family:'DM Sans',sans-serif;
+  font-size:15px;
+  font-weight:700;
+  color:#fff;
+  text-decoration:none;
+  border-radius:12px;
+  padding:13px 22px;
+  transition:filter .15s;
+}
+.catalogo .contacto-boton:hover{filter:brightness(1.12)}
+.catalogo .contacto-boton:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}
+.catalogo .contacto-wa{background:var(--verde)}
+.catalogo .contacto-ig{background:var(--vino)}
+
+/* ---------- Barra de pedido ---------- */
+.catalogo .barra{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  background:var(--tinta);
+  color:#fff;
+  padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+  transform:translateY(110%);
+  transition:transform .28s cubic-bezier(.2,.8,.3,1);
+  z-index:20;
+}
+.catalogo .barra.visible{transform:translateY(0)}
+.catalogo .barra-interior{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;gap:14px;
+}
+.catalogo .resumen{flex:1;min-width:0}
+.catalogo .resumen-linea{font-size:13px;color:#C9BCD1}
+.catalogo .resumen-total{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;margin-top:2px}
+.catalogo .enviar{
+  flex:0 0 auto;
+  font-family:'DM Sans',sans-serif;
+  font-size:15px;font-weight:700;
+  color:#fff;background:var(--verde);
+  border:none;border-radius:12px;
+  padding:14px 20px;
+  cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  text-decoration:none;
+  transition:background .15s;
+}
+.catalogo .enviar:hover{background:var(--verde-oscuro)}
+.catalogo .enviar:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.catalogo .vaciar{
+  background:none;border:none;
+  color:#C9BCD1;
+  font-size:12px;
+  text-decoration:underline;
+  cursor:pointer;
+  padding:2px 0 0;
+}
+.catalogo .vaciar:hover{color:#fff}
+
+.catalogo .pie{
+  text-align:center;
+  padding:10px 16px 30px;
+  font-size:12.5px;
+  color:var(--suave);
+  line-height:1.6;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .catalogo *{transition:none!important}
+}

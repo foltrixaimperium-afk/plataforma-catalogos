@@ -1,0 +1,23 @@
+# ══════════════════════════════════════════════════════════════════
+#  LA DIRECCIÓN DEL SITIO SE ESCRIBE ACÁ Y EN NINGÚN OTRO LADO.
+#  Cuando compres tu dominio, cambiás esta única línea y listo.
+#  Sin barra al final.
+# ══════════════════════════════════════════════════════════════════
+[build.environment]
+  VITE_SITE_URL = "https://tu-sitio.netlify.app"
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# La miniatura al compartir por WhatsApp.
+# Solo se mete en /nombre-de-tienda, no en el resto del sitio.
+[[edge_functions]]
+  function = "og"
+  path = "/:tienda"
+
+# El sitio es una sola página: todas las direcciones entran por index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

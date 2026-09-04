@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Armá tu catálogo</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --fondo:#EEF5F9;
+  --tinta:#1B2A33;
+  --suave:#5F7280;
+  --tarjeta:#FFFFFF;
+  --azul:#1E7CAB;
+  --azul-claro:#E3F1FA;
+  --azul-oscuro:#166187;
+  --verde:#0F7A6C;
+  --verde-oscuro:#0B5D52;
+  --rojo:#B03636;
+  --borde:#D9E6EE;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--fondo);
+  color:var(--tinta);
+  font-family:'DM Sans',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:90px;
+}
+
+/* ---------- Cabecera ---------- */
+.cabecera{
+  background:var(--azul);
+  color:#fff;
+  padding:26px 0 24px;
+  border-bottom-left-radius:22px;
+  border-bottom-right-radius:22px;
+}
+.envoltorio{max-width:1200px;margin:0 auto;padding:0 16px}
+.titulo{font-family:'Fraunces',Georgia,serif;font-size:clamp(28px,7vw,40px);font-weight:600;line-height:1.05}
+.bajada{margin-top:8px;font-size:15px;color:#D5EAF7;max-width:56ch;line-height:1.5}
+
+/* ---------- Estructura ---------- */
+.tablero{
+  max-width:1200px;
+  margin:0 auto;
+  padding:20px 16px 0;
+  display:grid;
+  gap:20px;
+  grid-template-columns:1fr;
+}
+@media(min-width:1000px){
+  .tablero{grid-template-columns:minmax(0,1fr) minmax(0,420px);align-items:start}
+  .columna-vista{position:sticky;top:16px}
+}
+
+.bloque{
+  background:var(--tarjeta);
+  border:1px solid var(--borde);
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:16px;
+}
+.bloque-titulo{
+  font-family:'Fraunces',Georgia,serif;
+  font-size:20px;
+  font-weight:600;
+  margin-bottom:4px;
+}
+.bloque-nota{font-size:13px;color:var(--suave);line-height:1.5;margin-bottom:14px}
+
+.campos{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:620px){.campos.dos{grid-template-columns:1fr 1fr}}
+
+.campo{display:flex;flex-direction:column;gap:5px}
+.campo label{font-size:13px;font-weight:500}
+.campo .ayuda{font-size:12px;color:var(--suave);line-height:1.4}
+input[type="text"],input[type="number"],input[type="url"],textarea,select{
+  font-family:'DM Sans',sans-serif;
+  font-size:15px;
+  color:var(--tinta);
+  background:#fff;
+  border:1px solid var(--borde);
+  border-radius:10px;
+  padding:10px 12px;
+  width:100%;
+}
+textarea{resize:vertical;min-height:64px;line-height:1.45}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--azul);outline-offset:1px;border-color:var(--azul)}
+
+/* ---------- Botones ---------- */
+.boton{
+  font-family:'DM Sans',sans-serif;
+  font-size:15px;
+  font-weight:700;
+  color:#fff;
+  background:var(--azul);
+  border:none;
+  border-radius:11px;
+  padding:12px 16px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  text-decoration:none;
+  transition:background .15s;
+}
+.boton:hover{background:var(--azul-oscuro)}
+.boton:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}
+.boton.verde{background:var(--verde)}
+.boton.verde:hover{background:var(--verde-oscuro)}
+.boton.suave{background:#fff;color:var(--tinta);border:1px solid var(--borde)}
+.boton.suave:hover{background:var(--azul-claro)}
+.boton.chico{font-size:13px;padding:8px 12px;border-radius:9px}
+.boton.peligro{background:#fff;color:var(--rojo);border:1px solid #E7C9C9}
+.boton.peligro:hover{background:#FBEFEF}
+.boton[disabled]{opacity:.5;cursor:not-allowed}
+
+/* ---------- Productos ---------- */
+.producto{
+  border:1px solid var(--borde);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:12px;
+  background:#FCFDFE;
+}
+.producto-cabecera{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+.producto-numero{
+  flex:0 0 auto;
+  width:26px;height:26px;
+  border-radius:50%;
+  background:var(--azul-claro);
+  color:var(--azul);
+  font-size:13px;
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.producto-nombre-vista{
+  flex:1;
+  min-width:0;
+  font-family:'Fraunces',Georgia,serif;
+  font-size:16px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.opciones-lista{display:flex;flex-direction:column;gap:8px}
+.opcion-fila{display:flex;gap:8px;align-items:center}
+.opcion-fila input:first-child{flex:2}
+.opcion-fila input:nth-child(2){flex:1;min-width:96px}
+
+/* ---------- Fotos ---------- */
+.fotos-tira{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.foto-chip{
+  position:relative;
+  width:96px;
+  aspect-ratio:3/4;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid var(--borde);
+  background:var(--azul-claro);
+}
+.foto-chip img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* La cruz para borrar, arriba a la derecha de cada foto. */
+.foto-borrar{
+  position:absolute;
+  top:5px;right:5px;
+  width:26px;height:26px;
+  padding:0;
+  border:none;
+  border-radius:50%;
+  background:rgba(27,42,51,.72);
+  color:#fff;
+  font-size:17px;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:background .15s;
+}
+.foto-borrar:hover{background:var(--rojo)}
+.foto-borrar:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+.foto-acciones{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  display:flex;
+}
+.foto-acciones button{
+  flex:1;
+  border:none;
+  background:rgba(27,42,51,.78);
+  color:#fff;
+  font-size:12px;
+  font-weight:500;
+  padding:7px 0;
+  cursor:pointer;
+}
+.foto-acciones button:hover{background:rgba(27,42,51,.95)}
+.foto-vacia{
+  width:96px;
+  aspect-ratio:3/4;
+  border:1px dashed var(--borde);
+  border-radius:10px;
+  color:var(--suave);
+  font-size:12px;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  cursor:pointer;
+  background:#fff;
+  padding:6px;
+}
+.foto-vacia:hover{border-color:var(--azul);color:var(--azul)}
+
+/* ---------- Recorte ---------- */
+.velo{
+  position:fixed;
+  inset:0;
+  background:rgba(15,28,36,.82);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:60;
+}
+.velo.abierto{display:flex}
+.recortador{
+  background:var(--tarjeta);
+  border-radius:16px;
+  padding:16px;
+  width:100%;
+  max-width:380px;
+  max-height:100%;
+  overflow:auto;
+}
+.recortador h3{font-family:'Fraunces',Georgia,serif;font-size:19px;font-weight:600;margin-bottom:2px}
+.recortador p.nota{font-size:12.5px;color:var(--suave);line-height:1.45;margin-bottom:12px}
+.marco{
+  position:relative;
+  width:100%;
+  max-width:270px;
+  margin:0 auto;
+  aspect-ratio:3/4;
+  border-radius:12px;
+  overflow:hidden;
+  background:#0E1A20;
+  touch-action:none;
+  cursor:grab;
+}
+.marco:active{cursor:grabbing}
+.marco canvas{width:100%;height:100%;display:block}
+.zoom{display:flex;align-items:center;gap:10px;margin:14px 0 4px}
+.zoom label{font-size:13px;font-weight:500;flex:0 0 auto}
+.zoom input[type="range"]{flex:1;accent-color:var(--azul)}
+.modos{display:flex;gap:8px;margin-top:12px}
+.modos .boton{flex:1;font-size:12.5px;padding:9px 8px;line-height:1.3;text-align:center}
+.modos .boton.elegido{background:var(--azul);color:#fff;border-color:var(--azul)}
+.recorte-botones{display:flex;gap:8px;margin-top:14px}
+.recorte-botones .boton{flex:1}
+
+/* ---------- Vista previa ---------- */
+.vista{
+  background:var(--tarjeta);
+  border:1px solid var(--borde);
+  border-radius:16px;
+  padding:14px;
+}
+.vista-marco{
+  border:1px solid var(--borde);
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff;
+  height:520px;
+}
+.vista-marco iframe{width:100%;height:100%;border:none;display:block}
+.vista-vacia{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:var(--suave);
+  font-size:13.5px;
+  padding:24px;
+  line-height:1.5;
+}
+
+/* ---------- Entrega ---------- */
+.entrega{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.aviso{
+  font-size:12.5px;
+  color:var(--suave);
+  line-height:1.5;
+  background:var(--azul-claro);
+  border-radius:10px;
+  padding:10px 12px;
+}
+.aviso strong{color:var(--tinta)}
+
+/* ---------- Barra fija ---------- */
+.barra{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  background:var(--tinta);
+  color:#fff;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  z-index:40;
+}
+.barra-interior{
+  max-width:1200px;
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.barra-texto{flex:1;min-width:0;font-size:13px;color:#C3D4DE;line-height:1.35}
+.barra-texto b{color:#fff;font-weight:700}
+
+.pie{
+  text-align:center;
+  padding:22px 16px 10px;
+  font-size:12.5px;
+  color:var(--suave);
+  line-height:1.6;
+}
+
+/* ---------- Subir un catálogo ya hecho ---------- */
+.subir-fila{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.subir-fila .ayuda{flex:1;min-width:180px}
+.subir-aviso{margin-top:10px}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="envoltorio">
+    <h1 class="titulo">Armá tu catálogo</h1>
+    <p class="bajada">Cargá tus datos y tus productos, encuadrá las fotos como quieras, y mandámelo por WhatsApp con un botón. No hace falta que busques ningún archivo.</p>
+  </div>
+</header>
+
+<div class="tablero">
+
+  <!-- ============ COLUMNA IZQUIERDA: FORMULARIO ============ -->
+  <div class="columna-forma">
+
+    <section class="bloque">
+      <h2 class="bloque-titulo">¿Ya tenés tu catálogo hecho?</h2>
+      <p class="bloque-nota">Si guardaste el archivo del catálogo, subilo acá y se abre tal como estaba. Cambiá lo que quieras y mandámelo de nuevo por WhatsApp para que lo actualice.</p>
+      <div class="subir-fila">
+        <button class="boton suave" type="button" id="btn-subir">Subir mi catálogo para editarlo</button>
+        <span class="ayuda">Es el archivo que termina en <strong>.html</strong>.</span>
+      </div>
+      <div class="aviso subir-aviso" id="aviso-subir">Si es la primera vez, no subas nada: cargá tus datos acá abajo.</div>
+    </section>
+
+    <section class="bloque">
+      <h2 class="bloque-titulo">Tu negocio</h2>
+      <p class="bloque-nota">Esto es lo que aparece arriba de todo en el catálogo.</p>
+      <div class="campos dos">
+        <div class="campo">
+          <label for="f-tienda">Nombre del negocio</label>
+          <input type="text" id="f-tienda" placeholder="Bazar Aurora">
+        </div>
+        <div class="campo">
+          <label for="f-whatsapp">Tu WhatsApp</label>
+          <input type="text" id="f-whatsapp" inputmode="numeric" placeholder="2604806530">
+          <span class="ayuda" id="ayuda-whatsapp">Con característica, sin 0 ni 15.</span>
+        </div>
+        <div class="campo">
+          <label for="f-frase">Frase corta</label>
+          <input type="text" id="f-frase" placeholder="Tienda de maquillaje y accesorios">
+        </div>
+        <div class="campo">
+          <label for="f-instagram">Instagram (opcional)</label>
+          <input type="text" id="f-instagram" placeholder="tu.usuario">
+        </div>
+        <div class="campo">
+          <label for="f-envios">Cartelito 1 &middot; envíos</label>
+          <input type="text" id="f-envios" placeholder="Envíos a toda la provincia">
+        </div>
+        <div class="campo">
+          <label for="f-horario">Cartelito 2 &middot; horario</label>
+          <input type="text" id="f-horario" placeholder="Lunes a viernes de 9 a 18">
+        </div>
+        <div class="campo">
+          <label for="f-moneda">Moneda</label>
+          <select id="f-moneda">
+            <option value="$">$ &middot; Pesos argentinos</option>
+            <option value="US$">US$ &middot; Dólares</option>
+            <option value="€">&euro; &middot; Euros</option>
+            <option value="R$">R$ &middot; Reales</option>
+            <option value="S/">S/ &middot; Soles</option>
+            <option value="Gs">Gs &middot; Guaraníes</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="f-color">Color principal</label>
+          <input type="color" id="f-color" value="#1E7CAB" style="height:44px;padding:4px;border:1px solid var(--borde);border-radius:10px;background:#fff;width:100%">
+          <span class="ayuda" id="ayuda-color">El color de la cabecera y los detalles.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="bloque">
+      <h2 class="bloque-titulo">Tus productos</h2>
+      <p class="bloque-nota">Agregá uno por uno. Las fotos las podés mover y agrandar para que queden bien encuadradas.</p>
+      <div id="lista-productos"></div>
+      <button class="boton" type="button" id="btn-agregar">+ Agregar producto</button>
+    </section>
+
+  </div>
+
+  <!-- ============ COLUMNA DERECHA: VISTA Y ENTREGA ============ -->
+  <div class="columna-vista">
+    <section class="vista">
+      <h2 class="bloque-titulo">Cómo va quedando</h2>
+      <p class="bloque-nota">Se actualiza solo mientras cargás.</p>
+      <div class="vista-marco" id="vista-marco">
+        <div class="vista-vacia" id="vista-vacia">Cargá el nombre del negocio y tu primer producto para ver la vista previa.</div>
+      </div>
+
+      <div class="entrega">
+        <button class="boton verde" type="button" id="btn-enviar">Enviármelo por WhatsApp</button>
+        <button class="boton suave" type="button" id="btn-descargar">Descargar el catálogo</button>
+        <div class="aviso" id="aviso-envio"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<p class="pie">Lo que cargues queda guardado en este mismo dispositivo. Podés cerrar la página y seguir después.</p>
+
+<div class="barra">
+  <div class="barra-interior">
+    <div class="barra-texto" id="barra-texto">Sin productos todavía</div>
+    <button class="boton verde" type="button" id="btn-enviar-2">Enviar</button>
+  </div>
+</div>
+
+<!-- ============ RECORTADOR ============ -->
+<div class="velo" id="velo-recorte" role="dialog" aria-modal="true" aria-label="Encuadrar la foto">
+  <div class="recortador">
+    <h3>Encuadrá la foto</h3>
+    <p class="nota">Arrastrá la foto para moverla y usá la barra para agrandarla. Lo que se ve en el recuadro es lo que va a salir. Si no querés que se recorte nada, elegí <strong>Foto entera</strong>: lo que sobra queda con fondo blanco.</p>
+    <div class="marco" id="marco-recorte">
+      <canvas id="lienzo-recorte" width="600" height="800"></canvas>
+    </div>
+    <div class="modos">
+      <button class="boton suave elegido" type="button" id="btn-modo-recorte">Llenar el recuadro</button>
+      <button class="boton suave" type="button" id="btn-modo-entera">Foto entera, con fondo blanco</button>
+    </div>
+    <div class="zoom">
+      <label for="f-zoom">Zoom</label>
+      <input type="range" id="f-zoom" min="100" max="400" value="100">
+    </div>
+    <div class="recorte-botones">
+      <button class="boton suave" type="button" id="btn-recorte-cancelar">Cancelar</button>
+      <button class="boton verde" type="button" id="btn-recorte-listo">Listo</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="entrada-fotos" accept="image/*" multiple hidden>
+<input type="file" id="entrada-catalogo" accept=".html,.htm,text/html" hidden>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   PLANTILLA DEL CATÁLOGO
+   Es el catálogo terminado, con marcadores {{...}} donde van los
+   datos. Va en base64 para no pelear con comillas ni etiquetas.
+   ═══════════════════════════════════════════════════════════════ */
+const PLANTILLA_B64 = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVzIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9IlVURi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xIj4KPHRpdGxlPnt7VElFTkRBfX0gwrcgQ2F0w6Fsb2dvPC90aXRsZT4KCjwhLS0KICDilIzilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilJAKICDilIIgIENBVMOBTE9HTyBERU1PIOKAlCBjw7NtbyBhZGFwdGFybG8gcGFyYSB1biBjbGllbnRlICAgICAgICAgICDilIIKICDilIIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIOKUggogIOKUgiAgMS4gTsOaTUVSTzogYnVzY2EgV0hBVFNBUFAgYWJham8geSBwb24gZWwgbsO6bWVybyBjb24gICAgICDilIIKICDilIIgICAgIGPDs2RpZ28gZGUgcGHDrXMsIHNpbiArLCBlc3BhY2lvcyBuaSBndWlvbmVzLiAgICAgICAgICAg4pSCCiAg4pSCICAyLiBUSUVOREE6IGNhbWJpYSBlbCBub21icmUsIGxhIGZyYXNlIHkgZWwgaG9yYXJpby4gICAgICDilIIKICDilIIgIDMuIFBST0RVQ1RPUzogZWRpdGEgbGEgbGlzdGEgUFJPRFVDVE9TLiBDYWRhIHVubyBsbGV2YSAgICDilIIKICDilIIgICAgIG5vbWJyZSwgcHJlY2lvLCBjYXRlZ29yw61hLCB0YWxsYXMgeSBmb3RvLiAgICAgICAgICAgICDilIIKICDilIIgIDQuIEZPVE9TOiBzdXN0aXR1eWUgImZvdG86IG51bGwiIHBvciBsYSBydXRhIG8gVVJMIGRlIGxhICDilIIKICDilIIgICAgIGltYWdlbiwgZWouIGZvdG86ICJmb3Rvcy92ZXN0aWRvLmpwZyIgICAgICAgICAgICAgICAgIOKUggogIOKUgiAgNS4gTU9ORURBOiBjYW1iaWEgTU9ORURBIHBvciAiJCIsICJNWE4iLCBldGMuICAgICAgICAgICAg4pSCCiAg4pSU4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSYCi0tPgoKPGxpbmsgcmVsPSJwcmVjb25uZWN0IiBocmVmPSJodHRwczovL2ZvbnRzLmdvb2dsZWFwaXMuY29tIj4KPGxpbmsgcmVsPSJwcmVjb25uZWN0IiBocmVmPSJodHRwczovL2ZvbnRzLmdzdGF0aWMuY29tIiBjcm9zc29yaWdpbj4KPGxpbmsgaHJlZj0iaHR0cHM6Ly9mb250cy5nb29nbGVhcGlzLmNvbS9jc3MyP2ZhbWlseT1GcmF1bmNlczpvcHN6LHdnaHRAOS4uMTQ0LDQwMDs5Li4xNDQsNjAwJmZhbWlseT1ETStTYW5zOndnaHRANDAwOzUwMDs3MDAmZmFtaWx5PURNK01vbm86d2dodEA0MDA7NTAwJmRpc3BsYXk9c3dhcCIgcmVsPSJzdHlsZXNoZWV0Ij4KCjxzdHlsZT4KOnJvb3R7CiAgLS1mb25kbzp7e0ZPTkRPfX07CiAgLS10aW50YTojMjQxQTJCOwogIC0tc3VhdmU6IzZFNjM3NzsKICAtLXRhcmpldGE6I0ZGRkZGRjsKICAtLXZpbm86e3tDT0xPUn19OwogIC0tdmluby1jbGFybzp7e0NPTE9SX0NMQVJPfX07CiAgLS12ZXJkZTojMEY3QTZDOwogIC0tdmVyZGUtb3NjdXJvOiMwQjVENTI7CiAgLS1ib3JkZTojRDlFNkVFOwp9Cgoqe2JveC1zaXppbmc6Ym9yZGVyLWJveDttYXJnaW46MDtwYWRkaW5nOjB9Cgpib2R5ewogIGJhY2tncm91bmQ6dmFyKC0tZm9uZG8pOwogIGNvbG9yOnZhcigtLXRpbnRhKTsKICBmb250LWZhbWlseTonRE0gU2Fucycsc3lzdGVtLXVpLHNhbnMtc2VyaWY7CiAgLXdlYmtpdC1mb250LXNtb290aGluZzphbnRpYWxpYXNlZDsKICBwYWRkaW5nLWJvdHRvbToxMjBweDsKfQoKLmVudm9sdG9yaW97bWF4LXdpZHRoOjExMDBweDttYXJnaW46MCBhdXRvO3BhZGRpbmc6MCAxNnB4fQoKLyogLS0tLS0tLS0tLSBDYWJlY2VyYSAtLS0tLS0tLS0tICovCi5jYWJlY2VyYXsKICBiYWNrZ3JvdW5kOnZhcigtLXZpbm8pOwogIGNvbG9yOiNmZmY7CiAgcGFkZGluZzozNHB4IDAgMzBweDsKICBib3JkZXItYm90dG9tLWxlZnQtcmFkaXVzOjI2cHg7CiAgYm9yZGVyLWJvdHRvbS1yaWdodC1yYWRpdXM6MjZweDsKfQoubWFyY2F7CiAgZm9udC1mYW1pbHk6J0ZyYXVuY2VzJyxHZW9yZ2lhLHNlcmlmOwogIGZvbnQtc2l6ZTpjbGFtcCgzNHB4LDEwdncsNTJweCk7CiAgZm9udC13ZWlnaHQ6NjAwOwogIGxldHRlci1zcGFjaW5nOi0wLjAyZW07CiAgbGluZS1oZWlnaHQ6MTsKfQoubGVtYXsKICBtYXJnaW4tdG9wOjEwcHg7CiAgZm9udC1zaXplOjE1cHg7CiAgbGluZS1oZWlnaHQ6MS41OwogIGNvbG9yOnt7Q09MT1JfTEVNQX19OwogIG1heC13aWR0aDozNGNoOwp9Ci5kYXRvc3sKICBtYXJnaW4tdG9wOjE4cHg7CiAgZGlzcGxheTpmbGV4OwogIGZsZXgtd3JhcDp3cmFwOwogIGdhcDo4cHg7Cn0KLmRhdG97CiAgZm9udC1zaXplOjEyLjVweDsKICBsZXR0ZXItc3BhY2luZzouMDRlbTsKICB0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7CiAgYmFja2dyb3VuZDpyZ2JhKDI1NSwyNTUsMjU1LC4xNCk7CiAgYm9yZGVyOjFweCBzb2xpZCByZ2JhKDI1NSwyNTUsMjU1LC4yMik7CiAgcGFkZGluZzo2cHggMTFweDsKICBib3JkZXItcmFkaXVzOjEwMHB4Owp9CgovKiAtLS0tLS0tLS0tIEZpbHRyb3MgLS0tLS0tLS0tLSAqLwouZmlsdHJvc3sKICBkaXNwbGF5OmZsZXg7CiAgZ2FwOjhweDsKICBvdmVyZmxvdy14OmF1dG87CiAgcGFkZGluZzoyMHB4IDE2cHggNHB4OwogIG1heC13aWR0aDoxMTAwcHg7CiAgbWFyZ2luOjAgYXV0bzsKICBzY3JvbGxiYXItd2lkdGg6bm9uZTsKfQouZmlsdHJvczo6LXdlYmtpdC1zY3JvbGxiYXJ7ZGlzcGxheTpub25lfQouZmlsdHJvewogIGZsZXg6MCAwIGF1dG87CiAgZm9udC1mYW1pbHk6J0RNIFNhbnMnLHNhbnMtc2VyaWY7CiAgZm9udC1zaXplOjE0cHg7CiAgZm9udC13ZWlnaHQ6NTAwOwogIGNvbG9yOnZhcigtLXN1YXZlKTsKICBiYWNrZ3JvdW5kOnRyYW5zcGFyZW50OwogIGJvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGUpOwogIGJvcmRlci1yYWRpdXM6MTAwcHg7CiAgcGFkZGluZzo5cHggMTZweDsKICBjdXJzb3I6cG9pbnRlcjsKICB0cmFuc2l0aW9uOmJhY2tncm91bmQgLjE1cyxjb2xvciAuMTVzLGJvcmRlci1jb2xvciAuMTVzOwp9Ci5maWx0cm86aG92ZXJ7Ym9yZGVyLWNvbG9yOnZhcigtLXZpbm8pO2NvbG9yOnZhcigtLXZpbm8pfQouZmlsdHJvW2FyaWEtcHJlc3NlZD0idHJ1ZSJdewogIGJhY2tncm91bmQ6dmFyKC0tdGludGEpOwogIGJvcmRlci1jb2xvcjp2YXIoLS10aW50YSk7CiAgY29sb3I6I2ZmZjsKfQouZmlsdHJvOmZvY3VzLXZpc2libGV7b3V0bGluZToycHggc29saWQgdmFyKC0tdmlubyk7b3V0bGluZS1vZmZzZXQ6MnB4fQoKLyogLS0tLS0tLS0tLSBSZWppbGxhIC0tLS0tLS0tLS0gKi8KLnJlamlsbGF7CiAgZGlzcGxheTpncmlkOwogIGdyaWQtdGVtcGxhdGUtY29sdW1uczpyZXBlYXQoMiwxZnIpOwogIGdhcDoxNHB4OwogIHBhZGRpbmc6MThweCAwIDQwcHg7Cn0KQG1lZGlhKG1pbi13aWR0aDo3MDBweCl7LnJlamlsbGF7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOnJlcGVhdCgzLDFmcik7Z2FwOjIwcHh9fQpAbWVkaWEobWluLXdpZHRoOjk4MHB4KXsucmVqaWxsYXtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDQsMWZyKX19CgouYXJ0aWN1bG97CiAgYmFja2dyb3VuZDp2YXIoLS10YXJqZXRhKTsKICBib3JkZXItcmFkaXVzOjE2cHg7CiAgb3ZlcmZsb3c6aGlkZGVuOwogIGRpc3BsYXk6ZmxleDsKICBmbGV4LWRpcmVjdGlvbjpjb2x1bW47CiAgYm9yZGVyOjFweCBzb2xpZCB2YXIoLS1ib3JkZSk7Cn0KCi5saWVuem97CiAgcG9zaXRpb246cmVsYXRpdmU7CiAgYXNwZWN0LXJhdGlvOjMvNDsKICBiYWNrZ3JvdW5kOnZhcigtLXZpbm8tY2xhcm8pOwogIGRpc3BsYXk6ZmxleDsKICBhbGlnbi1pdGVtczpjZW50ZXI7CiAganVzdGlmeS1jb250ZW50OmNlbnRlcjsKfQoubGllbnpvIGltZ3t3aWR0aDoxMDAlO2hlaWdodDoxMDAlO29iamVjdC1maXQ6Y292ZXI7ZGlzcGxheTpibG9ja30KLmxpZW56byBzdmd7d2lkdGg6NTIlO2hlaWdodDo1MiU7b3BhY2l0eTouNX0KLmV0aXF1ZXRhewogIHBvc2l0aW9uOmFic29sdXRlOwogIHRvcDoxMHB4O2xlZnQ6MTBweDsKICBiYWNrZ3JvdW5kOnZhcigtLXRpbnRhKTsKICBjb2xvcjojZmZmOwogIGZvbnQtc2l6ZToxMXB4OwogIGZvbnQtd2VpZ2h0OjUwMDsKICBsZXR0ZXItc3BhY2luZzouMDNlbTsKICBwYWRkaW5nOjRweCA5cHg7CiAgYm9yZGVyLXJhZGl1czoxMDBweDsKfQoKLyogLS0tLS0tLS0tLSBHYWxlcmlhIGRlIGZvdG9zIC0tLS0tLS0tLS0gKi8KLmdhbGVyaWEtZmxlY2hhewogIHBvc2l0aW9uOmFic29sdXRlOwogIHRvcDo1MCU7CiAgdHJhbnNmb3JtOnRyYW5zbGF0ZVkoLTUwJSk7CiAgd2lkdGg6MjhweDtoZWlnaHQ6MjhweDsKICBwYWRkaW5nOjA7CiAgYm9yZGVyOm5vbmU7CiAgYm9yZGVyLXJhZGl1czo1MCU7CiAgYmFja2dyb3VuZDpyZ2JhKDM2LDI2LDQzLC41KTsKICBjb2xvcjojZmZmOwogIGZvbnQtc2l6ZToxOHB4OwogIGxpbmUtaGVpZ2h0OjE7CiAgZGlzcGxheTpmbGV4OwogIGFsaWduLWl0ZW1zOmNlbnRlcjsKICBqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyOwogIGN1cnNvcjpwb2ludGVyOwogIHRyYW5zaXRpb246YmFja2dyb3VuZCAuMTVzOwp9Ci5nYWxlcmlhLWZsZWNoYTpob3ZlcntiYWNrZ3JvdW5kOnJnYmEoMzYsMjYsNDMsLjg1KX0KLmdhbGVyaWEtZmxlY2hhOmZvY3VzLXZpc2libGV7b3V0bGluZToycHggc29saWQgI2ZmZjtvdXRsaW5lLW9mZnNldDoycHh9Ci5nYWxlcmlhLWZsZWNoYS5hdHJhc3tsZWZ0OjhweH0KLmdhbGVyaWEtZmxlY2hhLmFkZWxhbnRle3JpZ2h0OjhweH0KLmdhbGVyaWEtcHVudG9zewogIHBvc2l0aW9uOmFic29sdXRlOwogIGJvdHRvbTo4cHg7bGVmdDowO3JpZ2h0OjA7CiAgZGlzcGxheTpmbGV4OwogIGp1c3RpZnktY29udGVudDpjZW50ZXI7CiAgZ2FwOjVweDsKfQoucHVudG97CiAgd2lkdGg6NnB4O2hlaWdodDo2cHg7CiAgcGFkZGluZzowOwogIGJvcmRlcjpub25lOwogIGJvcmRlci1yYWRpdXM6NTAlOwogIGJhY2tncm91bmQ6cmdiYSgyNTUsMjU1LDI1NSwuNTUpOwogIGJveC1zaGFkb3c6MCAwIDAgMXB4IHJnYmEoMzYsMjYsNDMsLjI1KTsKICBjdXJzb3I6cG9pbnRlcjsKfQoucHVudG9bYXJpYS1wcmVzc2VkPSJ0cnVlIl17YmFja2dyb3VuZDojZmZmfQoucHVudG86Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjJweCBzb2xpZCAjZmZmO291dGxpbmUtb2Zmc2V0OjJweH0KLmN1ZXJwb3twYWRkaW5nOjEycHggMTJweCAxNHB4O2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47Z2FwOjlweDtmbGV4OjF9Ci5ub21icmV7CiAgZm9udC1mYW1pbHk6J0ZyYXVuY2VzJyxHZW9yZ2lhLHNlcmlmOwogIGZvbnQtc2l6ZToxNnB4OwogIGZvbnQtd2VpZ2h0OjQwMDsKICBsaW5lLWhlaWdodDoxLjI1Owp9Ci5kZXRhbGxle2ZvbnQtc2l6ZToxMi41cHg7Y29sb3I6dmFyKC0tc3VhdmUpO2xpbmUtaGVpZ2h0OjEuNDV9Ci5wcmVjaW97CiAgZm9udC1mYW1pbHk6J0RNIE1vbm8nLG1vbm9zcGFjZTsKICBmb250LXNpemU6MTZweDsKICBmb250LXdlaWdodDo1MDA7CiAgbGV0dGVyLXNwYWNpbmc6LTAuMDJlbTsKfQoKLnRhbGxhc3sKICBkaXNwbGF5OmZsZXg7CiAgZmxleC13cmFwOndyYXA7CiAgZ2FwOjVweDsKfQoudGFsbGF7CiAgZm9udC1mYW1pbHk6J0RNIE1vbm8nLG1vbm9zcGFjZTsKICBmb250LXNpemU6MTJweDsKICBib3JkZXI6MXB4IHNvbGlkIHZhcigtLWJvcmRlKTsKICBiYWNrZ3JvdW5kOiNmZmY7CiAgY29sb3I6dmFyKC0tc3VhdmUpOwogIGJvcmRlci1yYWRpdXM6N3B4OwogIHBhZGRpbmc6NHB4IDhweDsKICBjdXJzb3I6cG9pbnRlcjsKICB0cmFuc2l0aW9uOmJhY2tncm91bmQgLjEycyxjb2xvciAuMTJzLGJvcmRlci1jb2xvciAuMTJzOwp9Ci50YWxsYTpob3Zlcntib3JkZXItY29sb3I6dmFyKC0tdGludGEpO2NvbG9yOnZhcigtLXRpbnRhKX0KLnRhbGxhW2FyaWEtcHJlc3NlZD0idHJ1ZSJde2JhY2tncm91bmQ6dmFyKC0tdGludGEpO2JvcmRlci1jb2xvcjp2YXIoLS10aW50YSk7Y29sb3I6I2ZmZn0KLnRhbGxhOmZvY3VzLXZpc2libGV7b3V0bGluZToycHggc29saWQgdmFyKC0tdmlubyk7b3V0bGluZS1vZmZzZXQ6MnB4fQoKLmFjY2lvbmVze21hcmdpbi10b3A6YXV0bztkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2dhcDo2cHh9Ci5hbmFkaXJ7CiAgd2lkdGg6MTAwJTsKICBmb250LWZhbWlseTonRE0gU2Fucycsc2Fucy1zZXJpZjsKICBmb250LXNpemU6MTRweDsKICBmb250LXdlaWdodDo3MDA7CiAgY29sb3I6I2ZmZjsKICBiYWNrZ3JvdW5kOnZhcigtLXZlcmRlKTsKICBib3JkZXI6bm9uZTsKICBib3JkZXItcmFkaXVzOjEwcHg7CiAgcGFkZGluZzoxMXB4OwogIGN1cnNvcjpwb2ludGVyOwogIHRyYW5zaXRpb246YmFja2dyb3VuZCAuMTVzOwp9Ci5hbmFkaXI6aG92ZXJ7YmFja2dyb3VuZDp2YXIoLS12ZXJkZS1vc2N1cm8pfQouYW5hZGlyOmZvY3VzLXZpc2libGV7b3V0bGluZToycHggc29saWQgdmFyKC0tdGludGEpO291dGxpbmUtb2Zmc2V0OjJweH0KLmFuYWRpci5wdWVzdG97YmFja2dyb3VuZDp2YXIoLS10aW50YSl9Ci5wcmVndW50YXJ7CiAgdGV4dC1hbGlnbjpjZW50ZXI7CiAgZm9udC1zaXplOjEyLjVweDsKICBjb2xvcjp2YXIoLS1zdWF2ZSk7CiAgdGV4dC1kZWNvcmF0aW9uOm5vbmU7CiAgcGFkZGluZzozcHg7CiAgYm9yZGVyLXJhZGl1czo2cHg7Cn0KLnByZWd1bnRhcjpob3Zlcntjb2xvcjp2YXIoLS12aW5vKTt0ZXh0LWRlY29yYXRpb246dW5kZXJsaW5lfQoucHJlZ3VudGFyOmZvY3VzLXZpc2libGV7b3V0bGluZToycHggc29saWQgdmFyKC0tdmlubyk7b3V0bGluZS1vZmZzZXQ6MnB4fQoKLyogLS0tLS0tLS0tLSBTZWxlY3RvciBkZSBjYW50aWRhZCAtLS0tLS0tLS0tICovCi5jYW50aWRhZHsKICBkaXNwbGF5OmZsZXg7CiAgYWxpZ24taXRlbXM6Y2VudGVyOwogIGp1c3RpZnktY29udGVudDpjZW50ZXI7CiAgZ2FwOjE0cHg7CiAgYm9yZGVyOjFweCBzb2xpZCB2YXIoLS1ib3JkZSk7CiAgYm9yZGVyLXJhZGl1czoxMHB4OwogIHBhZGRpbmc6NXB4Owp9Ci5jYW50aWRhZC1ib3RvbnsKICB3aWR0aDoyOHB4O2hlaWdodDoyOHB4OwogIHBhZGRpbmc6MDsKICBib3JkZXI6bm9uZTsKICBib3JkZXItcmFkaXVzOjdweDsKICBiYWNrZ3JvdW5kOnZhcigtLXZpbm8tY2xhcm8pOwogIGNvbG9yOnZhcigtLXRpbnRhKTsKICBmb250LXNpemU6MTdweDsKICBsaW5lLWhlaWdodDoxOwogIGN1cnNvcjpwb2ludGVyOwogIGRpc3BsYXk6ZmxleDsKICBhbGlnbi1pdGVtczpjZW50ZXI7CiAganVzdGlmeS1jb250ZW50OmNlbnRlcjsKICB0cmFuc2l0aW9uOmJhY2tncm91bmQgLjE1cyxjb2xvciAuMTVzOwp9Ci5jYW50aWRhZC1ib3Rvbjpob3ZlcntiYWNrZ3JvdW5kOnZhcigtLXZpbm8pO2NvbG9yOiNmZmZ9Ci5jYW50aWRhZC1ib3Rvbjpmb2N1cy12aXNpYmxle291dGxpbmU6MnB4IHNvbGlkIHZhcigtLXZpbm8pO291dGxpbmUtb2Zmc2V0OjJweH0KLmNhbnRpZGFkLW51bWVyb3sKICBmb250LWZhbWlseTonRE0gTW9ubycsbW9ub3NwYWNlOwogIGZvbnQtc2l6ZToxNXB4OwogIG1pbi13aWR0aDoyY2g7CiAgdGV4dC1hbGlnbjpjZW50ZXI7Cn0KLyogLS0tLS0tLS0tLSBWaXNvciBkZSBmb3RvIGFtcGxpYWRhIC0tLS0tLS0tLS0gKi8KLmxpZW56byBpbWd7Y3Vyc29yOnpvb20taW59Ci52aXNvcnsKICBwb3NpdGlvbjpmaXhlZDsKICBpbnNldDowOwogIGJhY2tncm91bmQ6cmdiYSgxOCwyNiwzMiwuOTQpOwogIHotaW5kZXg6NDA7CiAgZGlzcGxheTpub25lOwogIGFsaWduLWl0ZW1zOmNlbnRlcjsKICBqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyOwogIHBhZGRpbmc6MTZweDsKfQoudmlzb3IudmlzaWJsZXtkaXNwbGF5OmZsZXh9Ci52aXNvciBpbWd7CiAgbWF4LXdpZHRoOm1pbig5MnZ3LDcyMHB4KTsKICBtYXgtaGVpZ2h0Ojgwdmg7CiAgd2lkdGg6YXV0bztoZWlnaHQ6YXV0bzsKICBvYmplY3QtZml0OmNvbnRhaW47CiAgYm9yZGVyLXJhZGl1czoxMHB4OwogIGRpc3BsYXk6YmxvY2s7Cn0KLnZpc29yLWJvdG9uewogIHBvc2l0aW9uOmFic29sdXRlOwogIGJvcmRlcjpub25lOwogIGJhY2tncm91bmQ6cmdiYSgyNTUsMjU1LDI1NSwuMTYpOwogIGNvbG9yOiNmZmY7CiAgY3Vyc29yOnBvaW50ZXI7CiAgZGlzcGxheTpmbGV4OwogIGFsaWduLWl0ZW1zOmNlbnRlcjsKICBqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyOwogIHBhZGRpbmc6MDsKICB0cmFuc2l0aW9uOmJhY2tncm91bmQgLjE1czsKfQoudmlzb3ItYm90b246aG92ZXJ7YmFja2dyb3VuZDpyZ2JhKDI1NSwyNTUsMjU1LC4zNCl9Ci52aXNvci1ib3Rvbjpmb2N1cy12aXNpYmxle291dGxpbmU6MnB4IHNvbGlkICNmZmY7b3V0bGluZS1vZmZzZXQ6MnB4fQoudmlzb3ItY2VycmFyewogIHRvcDoxNHB4O3JpZ2h0OjE0cHg7CiAgd2lkdGg6NDBweDtoZWlnaHQ6NDBweDsKICBib3JkZXItcmFkaXVzOjUwJTsKICBmb250LXNpemU6MjZweDsKICBsaW5lLWhlaWdodDoxOwp9Ci52aXNvci1mbGVjaGF7CiAgdG9wOjUwJTsKICB0cmFuc2Zvcm06dHJhbnNsYXRlWSgtNTAlKTsKICB3aWR0aDo0NHB4O2hlaWdodDo0NHB4OwogIGJvcmRlci1yYWRpdXM6NTAlOwogIGZvbnQtc2l6ZToyNnB4OwogIGxpbmUtaGVpZ2h0OjE7Cn0KLnZpc29yLWZsZWNoYS5hdHJhc3tsZWZ0OjE0cHh9Ci52aXNvci1mbGVjaGEuYWRlbGFudGV7cmlnaHQ6MTRweH0KLnZpc29yLXBpZXsKICBwb3NpdGlvbjphYnNvbHV0ZTsKICBsZWZ0OjA7cmlnaHQ6MDtib3R0b206MjJweDsKICB0ZXh0LWFsaWduOmNlbnRlcjsKICBjb2xvcjojZmZmOwogIGZvbnQtc2l6ZToxMy41cHg7CiAgbGluZS1oZWlnaHQ6MS41OwogIHBhZGRpbmc6MCA2MHB4OwogIHBvaW50ZXItZXZlbnRzOm5vbmU7Cn0KLnZpc29yLWNvbnRhZG9yewogIGRpc3BsYXk6YmxvY2s7CiAgZm9udC1mYW1pbHk6J0RNIE1vbm8nLG1vbm9zcGFjZTsKICBmb250LXNpemU6MTJweDsKICBjb2xvcjpyZ2JhKDI1NSwyNTUsMjU1LC42NSk7CiAgbWFyZ2luLXRvcDozcHg7Cn0KCi8qIC0tLS0tLS0tLS0gQm90b25lcyBkZSBjb250YWN0byAtLS0tLS0tLS0tICovCi5jb250YWN0b3sKICBkaXNwbGF5OmZsZXg7CiAgZmxleC13cmFwOndyYXA7CiAganVzdGlmeS1jb250ZW50OmNlbnRlcjsKICBnYXA6MTBweDsKICBwYWRkaW5nOjAgMTZweCA0MHB4Owp9Ci5jb250YWN0by1ib3RvbnsKICBkaXNwbGF5OmZsZXg7CiAgYWxpZ24taXRlbXM6Y2VudGVyOwogIGdhcDo5cHg7CiAgZm9udC1mYW1pbHk6J0RNIFNhbnMnLHNhbnMtc2VyaWY7CiAgZm9udC1zaXplOjE1cHg7CiAgZm9udC13ZWlnaHQ6NzAwOwogIGNvbG9yOiNmZmY7CiAgdGV4dC1kZWNvcmF0aW9uOm5vbmU7CiAgYm9yZGVyLXJhZGl1czoxMnB4OwogIHBhZGRpbmc6MTNweCAyMnB4OwogIHRyYW5zaXRpb246ZmlsdGVyIC4xNXM7Cn0KLmNvbnRhY3RvLWJvdG9uOmhvdmVye2ZpbHRlcjpicmlnaHRuZXNzKDEuMTIpfQouY29udGFjdG8tYm90b246Zm9jdXMtdmlzaWJsZXtvdXRsaW5lOjJweCBzb2xpZCB2YXIoLS10aW50YSk7b3V0bGluZS1vZmZzZXQ6MnB4fQouY29udGFjdG8td2F7YmFja2dyb3VuZDp2YXIoLS12ZXJkZSl9Ci5jb250YWN0by1pZ3tiYWNrZ3JvdW5kOnZhcigtLXZpbm8pfQovKiAtLS0tLS0tLS0tIEJhcnJhIGRlIHBlZGlkbyAtLS0tLS0tLS0tICovCi5iYXJyYXsKICBwb3NpdGlvbjpmaXhlZDsKICBsZWZ0OjA7cmlnaHQ6MDtib3R0b206MDsKICBiYWNrZ3JvdW5kOnZhcigtLXRpbnRhKTsKICBjb2xvcjojZmZmOwogIHBhZGRpbmc6MTRweCAxNnB4IGNhbGMoMTRweCArIGVudihzYWZlLWFyZWEtaW5zZXQtYm90dG9tKSk7CiAgdHJhbnNmb3JtOnRyYW5zbGF0ZVkoMTEwJSk7CiAgdHJhbnNpdGlvbjp0cmFuc2Zvcm0gLjI4cyBjdWJpYy1iZXppZXIoLjIsLjgsLjMsMSk7CiAgei1pbmRleDoyMDsKfQouYmFycmEudmlzaWJsZXt0cmFuc2Zvcm06dHJhbnNsYXRlWSgwKX0KLmJhcnJhLWludGVyaW9yewogIG1heC13aWR0aDoxMTAwcHg7CiAgbWFyZ2luOjAgYXV0bzsKICBkaXNwbGF5OmZsZXg7CiAgYWxpZ24taXRlbXM6Y2VudGVyOwogIGdhcDoxNHB4Owp9Ci5yZXN1bWVue2ZsZXg6MTttaW4td2lkdGg6MH0KLnJlc3VtZW4tbGluZWF7Zm9udC1zaXplOjEzcHg7Y29sb3I6I0M5QkNEMX0KLnJlc3VtZW4tdG90YWx7Zm9udC1mYW1pbHk6J0RNIE1vbm8nLG1vbm9zcGFjZTtmb250LXNpemU6MTlweDtmb250LXdlaWdodDo1MDA7bWFyZ2luLXRvcDoycHh9Ci5lbnZpYXJ7CiAgZmxleDowIDAgYXV0bzsKICBmb250LWZhbWlseTonRE0gU2Fucycsc2Fucy1zZXJpZjsKICBmb250LXNpemU6MTVweDsKICBmb250LXdlaWdodDo3MDA7CiAgY29sb3I6I2ZmZjsKICBiYWNrZ3JvdW5kOnZhcigtLXZlcmRlKTsKICBib3JkZXI6bm9uZTsKICBib3JkZXItcmFkaXVzOjEycHg7CiAgcGFkZGluZzoxNHB4IDIwcHg7CiAgY3Vyc29yOnBvaW50ZXI7CiAgZGlzcGxheTpmbGV4OwogIGFsaWduLWl0ZW1zOmNlbnRlcjsKICBnYXA6OHB4OwogIHRleHQtZGVjb3JhdGlvbjpub25lOwogIHRyYW5zaXRpb246YmFja2dyb3VuZCAuMTVzOwp9Ci5lbnZpYXI6aG92ZXJ7YmFja2dyb3VuZDp2YXIoLS12ZXJkZS1vc2N1cm8pfQouZW52aWFyOmZvY3VzLXZpc2libGV7b3V0bGluZToycHggc29saWQgI2ZmZjtvdXRsaW5lLW9mZnNldDoycHh9Ci52YWNpYXJ7CiAgYmFja2dyb3VuZDpub25lO2JvcmRlcjpub25lOwogIGNvbG9yOiNDOUJDRDE7CiAgZm9udC1zaXplOjEycHg7CiAgdGV4dC1kZWNvcmF0aW9uOnVuZGVybGluZTsKICBjdXJzb3I6cG9pbnRlcjsKICBwYWRkaW5nOjJweCAwIDA7Cn0KLnZhY2lhcjpob3Zlcntjb2xvcjojZmZmfQoKLnBpZXsKICB0ZXh0LWFsaWduOmNlbnRlcjsKICBwYWRkaW5nOjEwcHggMTZweCAzMHB4OwogIGZvbnQtc2l6ZToxMi41cHg7CiAgY29sb3I6dmFyKC0tc3VhdmUpOwogIGxpbmUtaGVpZ2h0OjEuNjsKfQoKQG1lZGlhKHByZWZlcnMtcmVkdWNlZC1tb3Rpb246cmVkdWNlKXsKICAqe3RyYW5zaXRpb246bm9uZSFpbXBvcnRhbnR9Cn0KPC9zdHlsZT4KPC9oZWFkPgo8Ym9keT4KCjxoZWFkZXIgY2xhc3M9ImNhYmVjZXJhIj4KICA8ZGl2IGNsYXNzPSJlbnZvbHRvcmlvIj4KICAgIDxoMSBjbGFzcz0ibWFyY2EiPnt7VElFTkRBfX08L2gxPgogICAgPHAgY2xhc3M9ImxlbWEiPnt7RlJBU0V9fTwvcD4KICAgIDxkaXYgY2xhc3M9ImRhdG9zIj4KICAgICAgPHNwYW4gY2xhc3M9ImRhdG8iPnt7RU5WSU9TfX08L3NwYW4+CiAgICAgIDxzcGFuIGNsYXNzPSJkYXRvIj57e0hPUkFSSU99fTwvc3Bhbj4KICAgIDwvZGl2PgogIDwvZGl2Pgo8L2hlYWRlcj4KCjxuYXYgY2xhc3M9ImZpbHRyb3MiIGlkPSJmaWx0cm9zIiBhcmlhLWxhYmVsPSJDYXRlZ29yw61hcyI+PC9uYXY+Cgo8bWFpbiBjbGFzcz0iZW52b2x0b3JpbyI+CiAgPGRpdiBjbGFzcz0icmVqaWxsYSIgaWQ9InJlamlsbGEiPjwvZGl2Pgo8L21haW4+Cgo8cCBjbGFzcz0icGllIj4KICDCv0R1ZGFzIGNvbiB1bmEgdGFsbGEgbyBxdWllcmVzIHZlciBtw6FzIGZvdG9zPyBFc2Nyw61iZW5vcywgcmVzcG9uZGVtb3MgZWwgbWlzbW8gZMOtYS4KPC9wPgoKPGRpdiBjbGFzcz0iY29udGFjdG8iPgogIDxhIGNsYXNzPSJjb250YWN0by1ib3RvbiBjb250YWN0by13YSIgaWQ9ImNvbnRhY3RvV2EiIHRhcmdldD0iX2JsYW5rIiByZWw9Im5vb3BlbmVyIj4KICAgIDxzdmcgd2lkdGg9IjE5IiBoZWlnaHQ9IjE5IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9ImN1cnJlbnRDb2xvciIgYXJpYS1oaWRkZW49InRydWUiPjxwYXRoIGQ9Ik0xMiAyYTEwIDEwIDAgMCAwLTguNiAxNS4xTDIgMjJsNS4xLTEuM0ExMCAxMCAwIDEgMCAxMiAyWm01LjMgMTQuMWMtLjIuNi0xLjMgMS4yLTEuOCAxLjItLjUuMS0xIC4xLTEuNy0uMWExMyAxMyAwIDAgMS01LTMuMSAxMCAxMCAwIDAgMS0yLTNjLS4yLS42IDAtMS4yLjMtMS42bC42LS42YS42LjYgMCAwIDEgLjguMmwuOSAxLjZjLjEuMy4xLjUgMCAuN2wtLjQuNWMtLjIuMi0uMi40LS4xLjZhOCA4IDAgMCAwIDMuNyAzLjJjLjMuMS41IDAgLjYtLjFsLjYtLjdjLjItLjIuNC0uMy43LS4ybDEuNi44Yy4zLjIuNC40LjMuNloiLz48L3N2Zz4KICAgIEVzY3JpYmlub3MgcG9yIFdoYXRzQXBwCiAgPC9hPgogIDxhIGNsYXNzPSJjb250YWN0by1ib3RvbiBjb250YWN0by1pZyIgaHJlZj0ie3tJTlNUQUdSQU19fSIgdGFyZ2V0PSJfYmxhbmsiIHJlbD0ibm9vcGVuZXIiPgogICAgPHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMTkiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJjdXJyZW50Q29sb3IiIHN0cm9rZS13aWR0aD0iMiIgYXJpYS1oaWRkZW49InRydWUiPjxyZWN0IHg9IjIuNSIgeT0iMi41IiB3aWR0aD0iMTkiIGhlaWdodD0iMTkiIHJ4PSI1LjUiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI0LjIiLz48Y2lyY2xlIGN4PSIxNy42IiBjeT0iNi40IiByPSIxLjIiIGZpbGw9ImN1cnJlbnRDb2xvciIgc3Ryb2tlPSJub25lIi8+PC9zdmc+CiAgICBTZWd1aW5vcyBlbiBJbnN0YWdyYW0KICA8L2E+CjwvZGl2PgoKPGRpdiBjbGFzcz0iYmFycmEiIGlkPSJiYXJyYSIgcm9sZT0icmVnaW9uIiBhcmlhLWxpdmU9InBvbGl0ZSIgYXJpYS1sYWJlbD0iVHUgcGVkaWRvIj4KICA8ZGl2IGNsYXNzPSJiYXJyYS1pbnRlcmlvciI+CiAgICA8ZGl2IGNsYXNzPSJyZXN1bWVuIj4KICAgICAgPGRpdiBjbGFzcz0icmVzdW1lbi1saW5lYSIgaWQ9InJlc3VtZW5MaW5lYSI+U2luIGFydMOtY3Vsb3M8L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0icmVzdW1lbi10b3RhbCIgaWQ9InJlc3VtZW5Ub3RhbCI+JCAwPC9kaXY+CiAgICAgIDxidXR0b24gY2xhc3M9InZhY2lhciIgaWQ9InZhY2lhciIgdHlwZT0iYnV0dG9uIj5WYWNpYXIgcGVkaWRvPC9idXR0b24+CiAgICA8L2Rpdj4KICAgIDxhIGNsYXNzPSJlbnZpYXIiIGlkPSJlbnZpYXIiIGhyZWY9IiMiIHRhcmdldD0iX2JsYW5rIiByZWw9Im5vb3BlbmVyIj4KICAgICAgPHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iY3VycmVudENvbG9yIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PHBhdGggZD0iTTEyIDJhMTAgMTAgMCAwIDAtOC42IDE1LjFMMiAyMmw1LjEtMS4zQTEwIDEwIDAgMSAwIDEyIDJabTUuMyAxNC4xYy0uMi42LTEuMyAxLjItMS44IDEuMi0uNS4xLTEgLjEtMS43LS4xYTEzIDEzIDAgMCAxLTUtMy4xIDEwIDEwIDAgMCAxLTItM2MtLjItLjYgMC0xLjIuMy0xLjZsLjYtLjZhLjYuNiAwIDAgMSAuOC4ybC45IDEuNmMuMS4zLjEuNSAwIC43bC0uNC41Yy0uMi4yLS4yLjQtLjEuNmE4IDggMCAwIDAgMy43IDMuMmMuMy4xLjUgMCAuNi0uMWwuNi0uN2MuMi0uMi40LS4zLjctLjJsMS42LjhjLjMuMi40LjQuMy42WiIvPjwvc3ZnPgogICAgICBFbnZpYXIgcGVkaWRvCiAgICA8L2E+CiAgPC9kaXY+CjwvZGl2PgoKPGRpdiBjbGFzcz0idmlzb3IiIGlkPSJ2aXNvciIgcm9sZT0iZGlhbG9nIiBhcmlhLW1vZGFsPSJ0cnVlIiBhcmlhLWxhYmVsPSJGb3RvIGFtcGxpYWRhIj4KICA8YnV0dG9uIGNsYXNzPSJ2aXNvci1ib3RvbiB2aXNvci1jZXJyYXIiIGlkPSJ2aXNvckNlcnJhciIgdHlwZT0iYnV0dG9uIiBhcmlhLWxhYmVsPSJDZXJyYXIiPiZ0aW1lczs8L2J1dHRvbj4KICA8YnV0dG9uIGNsYXNzPSJ2aXNvci1ib3RvbiB2aXNvci1mbGVjaGEgYXRyYXMiIGlkPSJ2aXNvckF0cmFzIiB0eXBlPSJidXR0b24iIGFyaWEtbGFiZWw9IkZvdG8gYW50ZXJpb3IiPiZsc2FxdW87PC9idXR0b24+CiAgPGltZyBpZD0idmlzb3JJbWciIGFsdD0iIj4KICA8YnV0dG9uIGNsYXNzPSJ2aXNvci1ib3RvbiB2aXNvci1mbGVjaGEgYWRlbGFudGUiIGlkPSJ2aXNvckFkZWxhbnRlIiB0eXBlPSJidXR0b24iIGFyaWEtbGFiZWw9IkZvdG8gc2lndWllbnRlIj4mcnNhcXVvOzwvYnV0dG9uPgogIDxkaXYgY2xhc3M9InZpc29yLXBpZSI+CiAgICA8c3BhbiBpZD0idmlzb3JUaXR1bG8iPjwvc3Bhbj4KICAgIDxzcGFuIGNsYXNzPSJ2aXNvci1jb250YWRvciIgaWQ9InZpc29yQ29udGFkb3IiPjwvc3Bhbj4KICA8L2Rpdj4KPC9kaXY+CjxzY3JpcHQ+Ci8qIOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkCBFRElUQSBERSBBUVXDjSBIQUNJQSBBQkFKTyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZAgKi8KCmNvbnN0IFdIQVRTQVBQID0gInt7V0hBVFNBUFB9fSI7ICAvLyDihpAgbsO6bWVybyBjb24gY8OzZGlnbyBkZSBwYcOtcywgc2luICsgbmkgZXNwYWNpb3MKY29uc3QgVElFTkRBICAgPSAie3tUSUVOREFfSlN9fSI7CmNvbnN0IE1PTkVEQSAgID0gInt7TU9ORURBfX0iOwoKY29uc3QgUFJPRFVDVE9TID0ge3tQUk9EVUNUT1N9fTsKCi8qIOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkCBOTyBIQUNFIEZBTFRBIFRPQ0FSIE5BREEgREUgQVFVw40gQUJBSk8g4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQICovCgpjb25zdCBTSUxVRVRBUyA9IHsKICB2ZXN0aWRvOic8c3ZnIHZpZXdCb3g9IjAgMCA2MCA4MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ7e0NPTE9SfX0iIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjIgNmgxNmw4IDEwLTYgNSA0IDQ1SDE2bDQtNDUtNi01eiIvPjxwYXRoIGQ9Ik0yMiA2YzAgNCAzIDYgOCA2czgtMiA4LTYiLz48L3N2Zz4nLAogIHRvcDonPHN2ZyB2aWV3Qm94PSIwIDAgNjAgODAiIGZpbGw9Im5vbmUiIHN0cm9rZT0ie3tDT0xPUn19IiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDEyIDEwIDIwbDUgOSA1LTN2MzRoMjBWMjZsNSAzIDUtOS0xMS04eiIvPjxwYXRoIGQ9Ik0yMSAxMmMwIDUgNCA4IDkgOHM5LTMgOS04Ii8+PC9zdmc+JywKICBwYW50YWxvbjonPHN2ZyB2aWV3Qm94PSIwIDAgNjAgODAiIGZpbGw9Im5vbmUiIHN0cm9rZT0ie3tDT0xPUn19IiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTE3IDEwaDI2bDMgNjBIMzNsLTMtMzQtMyAzNEgxNHoiLz48cGF0aCBkPSJNMTcgMjBoMjYiLz48L3N2Zz4nLAogIGJvbHNvOic8c3ZnIHZpZXdCb3g9IjAgMCA2MCA4MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ7e0NPTE9SfX0iIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMzBoMzZsLTQgMzRIMTZ6Ii8+PHBhdGggZD0iTTIyIDMwdi02YTggOCAwIDAgMSAxNiAwdjYiLz48L3N2Zz4nCn07Cgpjb25zdCBwZWRpZG8gPSBuZXcgTWFwKCk7CmNvbnN0IGRpbmVybyA9IG4gPT4gTU9ORURBICsgIiAiICsgbi50b0xvY2FsZVN0cmluZygiZXMtQVIiKTsKCi8qIC0tLS0gRmlsdHJvcyAtLS0tICovCmNvbnN0IGNhdGVnb3JpYXMgPSBbIlRvZG8iLCAuLi5uZXcgU2V0KFBST0RVQ1RPUy5tYXAocCA9PiBwLmNhdGVnb3JpYSkpXTsKbGV0IGFjdGl2YSA9ICJUb2RvIjsKCmNvbnN0IG5hdkZpbHRyb3MgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgiZmlsdHJvcyIpOwpjYXRlZ29yaWFzLmZvckVhY2goY2F0ID0+IHsKICBjb25zdCBiID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgiYnV0dG9uIik7CiAgYi5jbGFzc05hbWUgPSAiZmlsdHJvIjsKICBiLnR5cGUgPSAiYnV0dG9uIjsKICBiLnRleHRDb250ZW50ID0gY2F0OwogIGIuc2V0QXR0cmlidXRlKCJhcmlhLXByZXNzZWQiLCBjYXQgPT09IGFjdGl2YSk7CiAgYi5vbmNsaWNrID0gKCkgPT4gewogICAgYWN0aXZhID0gY2F0OwogICAgWy4uLm5hdkZpbHRyb3MuY2hpbGRyZW5dLmZvckVhY2goeCA9PiB4LnNldEF0dHJpYnV0ZSgiYXJpYS1wcmVzc2VkIiwgeC50ZXh0Q29udGVudCA9PT0gY2F0KSk7CiAgICBwaW50YXIoKTsKICB9OwogIG5hdkZpbHRyb3MuYXBwZW5kQ2hpbGQoYik7Cn0pOwoKLyogLS0tLSBUYXJqZXRhcyAtLS0tICovCmNvbnN0IHJlamlsbGEgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgicmVqaWxsYSIpOwoKZnVuY3Rpb24gcGludGFyKCl7CiAgcmVqaWxsYS5pbm5lckhUTUwgPSAiIjsKICBQUk9EVUNUT1MKICAgIC5maWx0ZXIocCA9PiBhY3RpdmEgPT09ICJUb2RvIiB8fCBwLmNhdGVnb3JpYSA9PT0gYWN0aXZhKQogICAgLmZvckVhY2gocCA9PiByZWppbGxhLmFwcGVuZENoaWxkKHRhcmpldGEocCkpKTsKfQoKZnVuY3Rpb24gdGFyamV0YShwKXsKICBjb25zdCBhcnQgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCJhcnRpY2xlIik7CiAgYXJ0LmNsYXNzTmFtZSA9ICJhcnRpY3VsbyI7CgogIGNvbnN0IGZvdG9zID0gcC5mb3RvcyAmJiBwLmZvdG9zLmxlbmd0aCA/IHAuZm90b3MgOiAocC5mb3RvID8gW3AuZm90b10gOiBbXSk7CgogIGNvbnN0IHZpc3VhbCA9IGZvdG9zLmxlbmd0aAogICAgPyBgPGltZyBzcmM9IiR7Zm90b3NbMF19IiBhbHQ9IiR7cC5ub21icmV9IiBsb2FkaW5nPSJsYXp5Ij5gICsgKGZvdG9zLmxlbmd0aCA+IDEKICAgICAgICA/IGA8YnV0dG9uIGNsYXNzPSJnYWxlcmlhLWZsZWNoYSBhdHJhcyIgdHlwZT0iYnV0dG9uIiBhcmlhLWxhYmVsPSJGb3RvIGFudGVyaW9yIj4mbHNhcXVvOzwvYnV0dG9uPgogICAgICAgICAgIDxidXR0b24gY2xhc3M9ImdhbGVyaWEtZmxlY2hhIGFkZWxhbnRlIiB0eXBlPSJidXR0b24iIGFyaWEtbGFiZWw9IkZvdG8gc2lndWllbnRlIj4mcnNhcXVvOzwvYnV0dG9uPgogICAgICAgICAgIDxkaXYgY2xhc3M9ImdhbGVyaWEtcHVudG9zIj4ke2ZvdG9zLm1hcCgoXywgaSkgPT4KICAgICAgICAgICAgIGA8YnV0dG9uIGNsYXNzPSJwdW50byIgdHlwZT0iYnV0dG9uIiBhcmlhLWxhYmVsPSJGb3RvICR7aSArIDF9IiBhcmlhLXByZXNzZWQ9IiR7aSA9PT0gMH0iPjwvYnV0dG9uPmApLmpvaW4oIiIpfTwvZGl2PmAKICAgICAgICA6ICIiKQogICAgOiAoU0lMVUVUQVNbcC5mb3JtYV0gfHwgU0lMVUVUQVMudG9wKTsKCiAgYXJ0LmlubmVySFRNTCA9IGAKICAgIDxkaXYgY2xhc3M9ImxpZW56byI+CiAgICAgICR7cC5ldGlxdWV0YSA/IGA8c3BhbiBjbGFzcz0iZXRpcXVldGEiPiR7cC5ldGlxdWV0YX08L3NwYW4+YCA6ICIifQogICAgICAke3Zpc3VhbH0KICAgIDwvZGl2PgogICAgPGRpdiBjbGFzcz0iY3VlcnBvIj4KICAgICAgPGgyIGNsYXNzPSJub21icmUiPiR7cC5ub21icmV9PC9oMj4KICAgICAgPHAgY2xhc3M9ImRldGFsbGUiPiR7cC5kZXRhbGxlfTwvcD4KICAgICAgPHAgY2xhc3M9InByZWNpbyI+JHtkaW5lcm8ocC5wcmVjaW8pfTwvcD4KICAgICAgPGRpdiBjbGFzcz0idGFsbGFzIj48L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0iYWNjaW9uZXMiPgogICAgICAgIDxkaXYgY2xhc3M9ImNhbnRpZGFkIj4KICAgICAgICAgIDxidXR0b24gY2xhc3M9ImNhbnRpZGFkLWJvdG9uIG1lbm9zIiB0eXBlPSJidXR0b24iIGFyaWEtbGFiZWw9IlF1aXRhciB1bm8iPiZtaW51czs8L2J1dHRvbj4KICAgICAgICAgIDxzcGFuIGNsYXNzPSJjYW50aWRhZC1udW1lcm8iPjE8L3NwYW4+CiAgICAgICAgICA8YnV0dG9uIGNsYXNzPSJjYW50aWRhZC1ib3RvbiBtYXMiIHR5cGU9ImJ1dHRvbiIgYXJpYS1sYWJlbD0iU3VtYXIgdW5vIj4rPC9idXR0b24+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYW5hZGlyIiB0eXBlPSJidXR0b24iPkHDsWFkaXIgYWwgcGVkaWRvPC9idXR0b24+CiAgICAgICAgPGEgY2xhc3M9InByZWd1bnRhciIgdGFyZ2V0PSJfYmxhbmsiIHJlbD0ibm9vcGVuZXIiPlByZWd1bnRhciBwb3IgZXN0ZTwvYT4KICAgICAgPC9kaXY+CiAgICA8L2Rpdj5gOwoKICAvLyBHYWxlcmlhOiBwYXNhciBlbnRyZSBsYXMgZm90b3MgZGVsIHByb2R1Y3RvLCB5IGFtcGxpYXIgYWwgdG9jYXJsYQogIGxldCBhY3R1YWwgPSAwOwogIGlmIChmb3Rvcy5sZW5ndGgpIHsKICAgIGNvbnN0IGltYWdlbiA9IGFydC5xdWVyeVNlbGVjdG9yKCIubGllbnpvIGltZyIpOwogICAgY29uc3QgcHVudG9zID0gWy4uLmFydC5xdWVyeVNlbGVjdG9yQWxsKCIucHVudG8iKV07CiAgICBjb25zdCBtb3N0cmFyID0gaSA9PiB7CiAgICAgIGFjdHVhbCA9IChpICsgZm90b3MubGVuZ3RoKSAlIGZvdG9zLmxlbmd0aDsKICAgICAgaW1hZ2VuLnNyYyA9IGZvdG9zW2FjdHVhbF07CiAgICAgIHB1bnRvcy5mb3JFYWNoKChkLCBrKSA9PiBkLnNldEF0dHJpYnV0ZSgiYXJpYS1wcmVzc2VkIiwgayA9PT0gYWN0dWFsKSk7CiAgICB9OwogICAgaWYgKGZvdG9zLmxlbmd0aCA+IDEpIHsKICAgICAgYXJ0LnF1ZXJ5U2VsZWN0b3IoIi5hdHJhcyIpLm9uY2xpY2sgICAgPSAoKSA9PiBtb3N0cmFyKGFjdHVhbCAtIDEpOwogICAgICBhcnQucXVlcnlTZWxlY3RvcigiLmFkZWxhbnRlIikub25jbGljayA9ICgpID0+IG1vc3RyYXIoYWN0dWFsICsgMSk7CiAgICAgIHB1bnRvcy5mb3JFYWNoKChkLCBrKSA9PiBkLm9uY2xpY2sgPSAoKSA9PiBtb3N0cmFyKGspKTsKICAgIH0KICAgIGltYWdlbi5vbmNsaWNrID0gKCkgPT4gYWJyaXJWaXNvcihmb3RvcywgYWN0dWFsLCBwLm5vbWJyZSk7CiAgfQoKICAvLyBPcGNpb25lczogY2FkYSB1bmEgcHVlZGUgdHJhZXIgc3UgcHJvcGlvIHByZWNpbwogIGNvbnN0IG9wY2lvbmVzID0gKHAudGFsbGFzIHx8IFtdKS5tYXAodCA9PgogICAgdHlwZW9mIHQgPT09ICJzdHJpbmciID8geyBub21icmU6IHQsIHByZWNpbzogcC5wcmVjaW8gfQogICAgICAgICAgICAgICAgICAgICAgICAgIDogeyBub21icmU6IHQubm9tYnJlLCBwcmVjaW86IHQucHJlY2lvIHx8IHAucHJlY2lvIH0pOwoKICBjb25zdCBjYWphVGFsbGFzID0gYXJ0LnF1ZXJ5U2VsZWN0b3IoIi50YWxsYXMiKTsKICBjb25zdCBwcmVjaW9FbCAgID0gYXJ0LnF1ZXJ5U2VsZWN0b3IoIi5wcmVjaW8iKTsKICBjb25zdCBwcmVndW50YUVsID0gYXJ0LnF1ZXJ5U2VsZWN0b3IoIi5wcmVndW50YXIiKTsKICBsZXQgZWxlZ2lkYSAgPSBvcGNpb25lcy5sZW5ndGggPyBvcGNpb25lc1swXSA6IHsgbm9tYnJlOiAiIiwgcHJlY2lvOiBwLnByZWNpbyB9OwogIGxldCBjYW50aWRhZCA9IDE7CgogIGNvbnN0IHBpbnRhclByZWNpbyA9ICgpID0+IHsKICAgIHByZWNpb0VsLnRleHRDb250ZW50ID0gZGluZXJvKGVsZWdpZGEucHJlY2lvKTsKICAgIHByZWd1bnRhRWwuaHJlZiA9IGVubGFjZSgKICAgICAgYEhvbGEgJHtUSUVOREF9LCB0ZW5nbyB1bmEgZHVkYSBzb2JyZSAiJHtwLm5vbWJyZX0iJHtlbGVnaWRhLm5vbWJyZSA/IGAgKCR7ZWxlZ2lkYS5ub21icmV9KWAgOiAiIn0gKCR7ZGluZXJvKGVsZWdpZGEucHJlY2lvKX0pLmAKICAgICk7CiAgfTsKCiAgb3BjaW9uZXMuZm9yRWFjaChvID0+IHsKICAgIGNvbnN0IGIgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCJidXR0b24iKTsKICAgIGIuY2xhc3NOYW1lID0gInRhbGxhIjsKICAgIGIudHlwZSA9ICJidXR0b24iOwogICAgYi50ZXh0Q29udGVudCA9IG8ubm9tYnJlOwogICAgYi5zZXRBdHRyaWJ1dGUoImFyaWEtcHJlc3NlZCIsIG8ubm9tYnJlID09PSBlbGVnaWRhLm5vbWJyZSk7CiAgICBiLm9uY2xpY2sgPSAoKSA9PiB7CiAgICAgIGVsZWdpZGEgPSBvOwogICAgICBbLi4uY2FqYVRhbGxhcy5jaGlsZHJlbl0uZm9yRWFjaCh4ID0+IHguc2V0QXR0cmlidXRlKCJhcmlhLXByZXNzZWQiLCB4LnRleHRDb250ZW50ID09PSBvLm5vbWJyZSkpOwogICAgICBwaW50YXJQcmVjaW8oKTsKICAgICAgaWYgKHBlZGlkby5oYXMocC5ub21icmUpKSB7CiAgICAgICAgY29uc3QgZW5QZWRpZG8gPSBwZWRpZG8uZ2V0KHAubm9tYnJlKTsKICAgICAgICBlblBlZGlkby50YWxsYSAgPSBvLm5vbWJyZTsKICAgICAgICBlblBlZGlkby5wcmVjaW8gPSBvLnByZWNpbzsKICAgICAgICByZWZyZXNjYXJCYXJyYSgpOwogICAgICB9CiAgICB9OwogICAgY2FqYVRhbGxhcy5hcHBlbmRDaGlsZChiKTsKICB9KTsKICBwaW50YXJQcmVjaW8oKTsKCiAgLy8gQ2FudGlkYWQKICBjb25zdCBudW1lcm9FbCA9IGFydC5xdWVyeVNlbGVjdG9yKCIuY2FudGlkYWQtbnVtZXJvIik7CiAgY29uc3QgZmlqYXJDYW50aWRhZCA9IGMgPT4gewogICAgY2FudGlkYWQgPSBNYXRoLm1pbig5OSwgTWF0aC5tYXgoMSwgYykpOwogICAgbnVtZXJvRWwudGV4dENvbnRlbnQgPSBjYW50aWRhZDsKICAgIGlmIChwZWRpZG8uaGFzKHAubm9tYnJlKSkgeyBwZWRpZG8uZ2V0KHAubm9tYnJlKS5jYW50aWRhZCA9IGNhbnRpZGFkOyByZWZyZXNjYXJCYXJyYSgpOyB9CiAgfTsKICBhcnQucXVlcnlTZWxlY3RvcigiLm1lbm9zIikub25jbGljayA9ICgpID0+IGZpamFyQ2FudGlkYWQoY2FudGlkYWQgLSAxKTsKICBhcnQucXVlcnlTZWxlY3RvcigiLm1hcyIpLm9uY2xpY2sgICA9ICgpID0+IGZpamFyQ2FudGlkYWQoY2FudGlkYWQgKyAxKTsKICAvLyBBw7FhZGlyIC8gcXVpdGFyCiAgY29uc3QgYnRuID0gYXJ0LnF1ZXJ5U2VsZWN0b3IoIi5hbmFkaXIiKTsKICBjb25zdCBzaW5jcm9uaXphciA9ICgpID0+IHsKICAgIGNvbnN0IGRlbnRybyA9IHBlZGlkby5oYXMocC5ub21icmUpOwogICAgYnRuLnRleHRDb250ZW50ID0gZGVudHJvID8gIlF1aXRhciBkZWwgcGVkaWRvIiA6ICJBw7FhZGlyIGFsIHBlZGlkbyI7CiAgICBidG4uY2xhc3NMaXN0LnRvZ2dsZSgicHVlc3RvIiwgZGVudHJvKTsKICB9OwogIGJ0bi5vbmNsaWNrID0gKCkgPT4gewogICAgaWYgKHBlZGlkby5oYXMocC5ub21icmUpKSBwZWRpZG8uZGVsZXRlKHAubm9tYnJlKTsKICAgIGVsc2UgcGVkaWRvLnNldChwLm5vbWJyZSwgeyBwcmVjaW86IGVsZWdpZGEucHJlY2lvLCB0YWxsYTogZWxlZ2lkYS5ub21icmUsIGNhbnRpZGFkIH0pOwogICAgc2luY3Jvbml6YXIoKTsKICAgIHJlZnJlc2NhckJhcnJhKCk7CiAgfTsKICBzaW5jcm9uaXphcigpOwoKICByZXR1cm4gYXJ0Owp9CgovKiAtLS0tIEJhcnJhIGRlIHBlZGlkbyAtLS0tICovCmNvbnN0IGJhcnJhICAgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgiYmFycmEiKTsKY29uc3QgbGluZWEgICA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJyZXN1bWVuTGluZWEiKTsKY29uc3QgdG90YWxFbCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJyZXN1bWVuVG90YWwiKTsKY29uc3QgZW52aWFyICA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJlbnZpYXIiKTsKCmZ1bmN0aW9uIHJlZnJlc2NhckJhcnJhKCl7CiAgY29uc3QgbiA9IHBlZGlkby5zaXplOwogIGJhcnJhLmNsYXNzTGlzdC50b2dnbGUoInZpc2libGUiLCBuID4gMCk7CiAgaWYgKCFuKSByZXR1cm47CgogIGNvbnN0IHVuaWRhZGVzID0gWy4uLnBlZGlkby52YWx1ZXMoKV0ucmVkdWNlKChzLCBpKSA9PiBzICsgaS5jYW50aWRhZCwgMCk7CiAgY29uc3QgdG90YWwgICAgPSBbLi4ucGVkaWRvLnZhbHVlcygpXS5yZWR1Y2UoKHMsIGkpID0+IHMgKyBpLnByZWNpbyAqIGkuY2FudGlkYWQsIDApOwogIGxpbmVhLnRleHRDb250ZW50ID0gdW5pZGFkZXMgPT09IDEgPyAiMSBhcnRcdTAwZWRjdWxvIiA6IGAke3VuaWRhZGVzfSBhcnRcdTAwZWRjdWxvc2A7CiAgdG90YWxFbC50ZXh0Q29udGVudCA9IGRpbmVybyh0b3RhbCk7CgogIGxldCB0ZXh0byA9IGBIb2xhICR7VElFTkRBfSwgcXVpZXJvIHBlZGlyOlxuYDsKICBwZWRpZG8uZm9yRWFjaCgoaW5mbywgbm9tYnJlKSA9PiB7CiAgICBjb25zdCBvcGNpb24gPSBpbmZvLnRhbGxhICYmIGluZm8udGFsbGEgIT09ICJcdTAwZGFuaWNhIiA/IGAgKCR7aW5mby50YWxsYX0pYCA6ICIiOwogICAgY29uc3QgY3VlbnRhID0gaW5mby5jYW50aWRhZCA+IDEgPyBgIHgke2luZm8uY2FudGlkYWR9YCA6ICIiOwogICAgdGV4dG8gKz0gYFx1MjAyMiAke25vbWJyZX0ke29wY2lvbn0ke2N1ZW50YX0gXHUyMDE0ICR7ZGluZXJvKGluZm8ucHJlY2lvICogaW5mby5jYW50aWRhZCl9XG5gOwogIH0pOwogIHRleHRvICs9IGBcblRvdGFsOiAke2RpbmVybyh0b3RhbCl9YDsKICBlbnZpYXIuaHJlZiA9IGVubGFjZSh0ZXh0byk7Cn0KCmZ1bmN0aW9uIGVubGFjZSh0ZXh0byl7CiAgcmV0dXJuIGBodHRwczovL3dhLm1lLyR7V0hBVFNBUFB9P3RleHQ9JHtlbmNvZGVVUklDb21wb25lbnQodGV4dG8pfWA7Cn0KCi8qIC0tLS0gVmlzb3IgZGUgZm90byBhbXBsaWFkYSAtLS0tICovCmNvbnN0IHZpc29yICAgICA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJ2aXNvciIpOwpjb25zdCB2aXNvckltZyAgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgidmlzb3JJbWciKTsKY29uc3Qgdmlzb3JUaXQgID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoInZpc29yVGl0dWxvIik7CmNvbnN0IHZpc29yQ29udCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJ2aXNvckNvbnRhZG9yIik7CmNvbnN0IHZpc29yQXRyICA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJ2aXNvckF0cmFzIik7CmNvbnN0IHZpc29yQWRlICA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJ2aXNvckFkZWxhbnRlIik7CmxldCB2aXNvckZvdG9zID0gW107CmxldCB2aXNvclBvcyAgID0gMDsKCmZ1bmN0aW9uIGFicmlyVmlzb3IoZm90b3MsIHBvcywgdGl0dWxvKXsKICB2aXNvckZvdG9zID0gZm90b3M7CiAgdmlzb3JUaXQudGV4dENvbnRlbnQgPSB0aXR1bG87CiAgY29uc3QgaGF5VmFyaWFzID0gZm90b3MubGVuZ3RoID4gMTsKICB2aXNvckF0ci5oaWRkZW4gPSAhaGF5VmFyaWFzOwogIHZpc29yQWRlLmhpZGRlbiA9ICFoYXlWYXJpYXM7CiAgdmlzb3JDb250LmhpZGRlbiA9ICFoYXlWYXJpYXM7CiAgdmVyRW5WaXNvcihwb3MpOwogIHZpc29yLmNsYXNzTGlzdC5hZGQoInZpc2libGUiKTsKICBkb2N1bWVudC5ib2R5LnN0eWxlLm92ZXJmbG93ID0gImhpZGRlbiI7Cn0KCmZ1bmN0aW9uIHZlckVuVmlzb3IoaSl7CiAgdmlzb3JQb3MgPSAoaSArIHZpc29yRm90b3MubGVuZ3RoKSAlIHZpc29yRm90b3MubGVuZ3RoOwogIHZpc29ySW1nLnNyYyA9IHZpc29yRm90b3Nbdmlzb3JQb3NdOwogIHZpc29ySW1nLmFsdCA9IHZpc29yVGl0LnRleHRDb250ZW50OwogIHZpc29yQ29udC50ZXh0Q29udGVudCA9ICh2aXNvclBvcyArIDEpICsgIiAvICIgKyB2aXNvckZvdG9zLmxlbmd0aDsKfQoKZnVuY3Rpb24gY2VycmFyVmlzb3IoKXsKICB2aXNvci5jbGFzc0xpc3QucmVtb3ZlKCJ2aXNpYmxlIik7CiAgZG9jdW1lbnQuYm9keS5zdHlsZS5vdmVyZmxvdyA9ICIiOwogIHZpc29ySW1nLnNyYyA9ICIiOwp9Cgpkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgidmlzb3JDZXJyYXIiKS5vbmNsaWNrID0gY2VycmFyVmlzb3I7CnZpc29yQXRyLm9uY2xpY2sgPSBlID0+IHsgZS5zdG9wUHJvcGFnYXRpb24oKTsgdmVyRW5WaXNvcih2aXNvclBvcyAtIDEpOyB9Owp2aXNvckFkZS5vbmNsaWNrID0gZSA9PiB7IGUuc3RvcFByb3BhZ2F0aW9uKCk7IHZlckVuVmlzb3Iodmlzb3JQb3MgKyAxKTsgfTsKdmlzb3Iub25jbGljayA9IGUgPT4geyBpZiAoZS50YXJnZXQgPT09IHZpc29yIHx8IGUudGFyZ2V0ID09PSB2aXNvckltZykgY2VycmFyVmlzb3IoKTsgfTsKZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcigia2V5ZG93biIsIGUgPT4gewogIGlmICghdmlzb3IuY2xhc3NMaXN0LmNvbnRhaW5zKCJ2aXNpYmxlIikpIHJldHVybjsKICBpZiAoZS5rZXkgPT09ICJFc2NhcGUiKSAgICAgY2VycmFyVmlzb3IoKTsKICBpZiAoZS5rZXkgPT09ICJBcnJvd0xlZnQiKSAgdmVyRW5WaXNvcih2aXNvclBvcyAtIDEpOwogIGlmIChlLmtleSA9PT0gIkFycm93UmlnaHQiKSB2ZXJFblZpc29yKHZpc29yUG9zICsgMSk7Cn0pOwoKLyogLS0tLSBCb3RvbiBkZSBXaGF0c0FwcCBkZWwgcGllIC0tLS0gKi8KZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoImNvbnRhY3RvV2EiKS5ocmVmID0KICBlbmxhY2UoIkhvbGEgIiArIFRJRU5EQSArICIsIHRlIGVzY3JpYm8gZGVzZGUgZWwgY2F0XHUwMGUxbG9nby4iKTsKCmRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJ2YWNpYXIiKS5vbmNsaWNrID0gKCkgPT4gewogIHBlZGlkby5jbGVhcigpOwogIHJlZnJlc2NhckJhcnJhKCk7CiAgcGludGFyKCk7Cn07CgpwaW50YXIoKTsKPC9zY3JpcHQ+CjwvYm9keT4KPC9odG1sPgo=";
+
+const PLANTILLA = new TextDecoder().decode(
+  Uint8Array.from(atob(PLANTILLA_B64), c => c.charCodeAt(0))
+);
+
+/* ═══════════════════ ESTADO ═══════════════════ */
+
+const proyecto = {
+  negocio:{ tienda:"", whatsapp:"", frase:"", horario:"", envios:"", moneda:"$", instagram:"", color:"#1E7CAB" },
+  productos:[]
+};
+
+/* El WhatsApp al que llega el catálogo terminado. */
+const MI_WHATSAPP = "5492604806530";
+
+let siguienteId = 1;
+const nuevoId = () => "p" + (siguienteId++);
+
+/* ═══════════════════ GUARDADO EN EL DISPOSITIVO ═══════════════════ */
+
+const BASE = "creadorCatalogo";
+
+function abrirBase(){
+  return new Promise((ok, err) => {
+    const p = indexedDB.open(BASE, 1);
+    p.onupgradeneeded = () => p.result.createObjectStore("datos");
+    p.onsuccess = () => ok(p.result);
+    p.onerror   = () => err(p.error);
+  });
+}
+
+let guardadoPendiente = null;
+function guardarLuego(){
+  clearTimeout(guardadoPendiente);
+  guardadoPendiente = setTimeout(guardar, 600);
+}
+
+async function guardar(){
+  try{
+    const base = await abrirBase();
+    base.transaction("datos", "readwrite").objectStore("datos").put(proyecto, "actual");
+  }catch(e){ /* modo privado o sin permiso: seguimos sin guardar */ }
+}
+
+async function recuperar(){
+  try{
+    const base = await abrirBase();
+    return await new Promise(ok => {
+      const p = base.transaction("datos").objectStore("datos").get("actual");
+      p.onsuccess = () => ok(p.result || null);
+      p.onerror   = () => ok(null);
+    });
+  }catch(e){ return null; }
+}
+
+/* ═══════════════════ HERRAMIENTAS ═══════════════════ */
+
+function escaparHtml(t){
+  return String(t == null ? "" : t)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function escaparJs(t){
+  return String(t == null ? "" : t)
+    .replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\n/g,"\\n");
+}
+
+/* 2604806530 -> 5492604806530 */
+function normalizarWhatsapp(crudo){
+  let n = String(crudo || "").replace(/\D/g,"");
+  if(!n) return "";
+  if(n.startsWith("549")) return n;
+  if(n.startsWith("54"))  return "549" + n.slice(2);
+  n = n.replace(/^0/,"");
+  n = n.replace(/^(\d{2,4})15/,"$1");
+  return "549" + n;
+}
+
+function instagramUrl(crudo){
+  const t = String(crudo || "").trim();
+  if(!t) return "";
+  if(/^https?:\/\//i.test(t)) return t;
+  return "https://www.instagram.com/" + t.replace(/^@/,"").replace(/\/+$/,"") + "/";
+}
+
+/* Mezcla un color con blanco. p=0 devuelve el color, p=1 devuelve blanco. */
+function aclarar(hex, p){
+  const c = hex.replace("#","");
+  const r = parseInt(c.slice(0,2),16), g = parseInt(c.slice(2,4),16), b = parseInt(c.slice(4,6),16);
+  const m = v => Math.round(v + (255 - v) * p).toString(16).padStart(2,"0");
+  return "#" + m(r) + m(g) + m(b);
+}
+
+/* Contraste con el blanco, para avisar si el color es muy claro. */
+function contrasteConBlanco(hex){
+  const c = hex.replace("#","");
+  const canal = v => { v /= 255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
+  const L = 0.2126*canal(parseInt(c.slice(0,2),16))
+          + 0.7152*canal(parseInt(c.slice(2,4),16))
+          + 0.0722*canal(parseInt(c.slice(4,6),16));
+  return 1.05 / (L + 0.05);
+}
+
+function nombreArchivo(){
+  const base = (proyecto.negocio.tienda || "catalogo")
+    .toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "catalogo";
+  return "catalogo-" + base + ".html";
+}
+
+/* ═══════════════════ GENERAR EL CATÁLOGO ═══════════════════ */
+
+function armarProductos(){
+  return proyecto.productos
+    .filter(p => (p.nombre || "").trim())
+    .map(p => {
+      const opciones = (p.opciones || []).filter(o => (o.nombre || "").trim());
+      const salida = {
+        nombre:    p.nombre.trim(),
+        categoria: (p.categoria || "General").trim(),
+        precio:    Number(p.precio) || 0,
+        fotos:     (p.fotos || []).map(f => f.recortada).filter(Boolean),
+        detalle:   (p.detalle || "").trim(),
+        tallas:    opciones.length
+                     ? opciones.map(o => Number(o.precio)
+                         ? { nombre: o.nombre.trim(), precio: Number(o.precio) }
+                         : o.nombre.trim())
+                     : ["Única"]
+      };
+      if((p.etiqueta || "").trim()) salida.etiqueta = p.etiqueta.trim();
+      if(!salida.fotos.length) salida.forma = p.forma || "bolso";
+      return salida;
+    });
+}
+
+function generarCatalogo(){
+  const n = proyecto.negocio;
+  const color = n.color || "#1E7CAB";
+
+  const valores = {
+    "{{TIENDA}}":       escaparHtml(n.tienda || "Mi catálogo"),
+    "{{TIENDA_JS}}":    escaparJs(n.tienda || "Mi catálogo"),
+    "{{WHATSAPP}}":     escaparJs(normalizarWhatsapp(n.whatsapp)),
+    "{{MONEDA}}":       escaparJs(n.moneda || "$"),
+    "{{FRASE}}":        escaparHtml(n.frase || ""),
+    "{{ENVIOS}}":       escaparHtml(n.envios || ""),
+    "{{HORARIO}}":      escaparHtml(n.horario || ""),
+    "{{INSTAGRAM}}":    escaparHtml(instagramUrl(n.instagram) || "#"),
+    "{{COLOR}}":        color,
+    "{{COLOR_CLARO}}":  aclarar(color, 0.88),
+    "{{COLOR_LEMA}}":   aclarar(color, 0.78),
+    "{{FONDO}}":        aclarar(color, 0.94),
+    "{{PRODUCTOS}}":    JSON.stringify(armarProductos(), null, 2)
+  };
+
+  let html = PLANTILLA;
+  for(const [marca, valor] of Object.entries(valores)){
+    html = html.split(marca).join(valor);
+  }
+
+  /* Sin Instagram cargado, el botón se va. */
+  if(!instagramUrl(n.instagram)){
+    html = html.replace(/\s*<a class="contacto-boton contacto-ig"[\s\S]*?<\/a>/, "");
+  }
+
+  /* Le dejamos adentro los datos del creador, para poder reabrirlo y editarlo. */
+  return insertarDatosCreador(html);
+}
+
+/* ═══════════════════ VISTA PREVIA ═══════════════════ */
+
+const marcoVista = document.getElementById("vista-marco");
+let vistaPendiente = null, urlVistaAnterior = null;
+
+function refrescarVista(){
+  clearTimeout(vistaPendiente);
+  vistaPendiente = setTimeout(() => {
+    const hayAlgo = proyecto.negocio.tienda || armarProductos().length;
+    if(!hayAlgo){
+      marcoVista.innerHTML = '<div class="vista-vacia">Cargá el nombre del negocio y tu primer producto para ver la vista previa.</div>';
+      return;
+    }
+    /* Va por blob y no por srcdoc: así las fotos incrustadas cargan siempre. */
+    const url = URL.createObjectURL(new Blob([generarCatalogo()], { type:"text/html" }));
+    const marco = document.createElement("iframe");
+    marco.setAttribute("title", "Vista previa del catálogo");
+    marco.src = url;
+    marcoVista.innerHTML = "";
+    marcoVista.appendChild(marco);
+    if(urlVistaAnterior) URL.revokeObjectURL(urlVistaAnterior);
+    urlVistaAnterior = url;
+  }, 400);
+}
+
+function refrescarBarra(){
+  const listos = armarProductos();
+  const fotos  = listos.reduce((s,p) => s + p.fotos.length, 0);
+  const texto  = document.getElementById("barra-texto");
+  if(!listos.length){
+    texto.innerHTML = "Sin productos todavía";
+  }else{
+    texto.innerHTML = "<b>" + listos.length + (listos.length === 1 ? " producto" : " productos") +
+                      "</b> &middot; " + fotos + (fotos === 1 ? " foto" : " fotos");
+  }
+}
+
+function cambio(){
+  guardarLuego();
+  refrescarVista();
+  refrescarBarra();
+}
+
+/* ═══════════════════ FORMULARIO DEL NEGOCIO ═══════════════════ */
+
+const camposNegocio = {
+  tienda:"f-tienda", whatsapp:"f-whatsapp", frase:"f-frase", horario:"f-horario",
+  envios:"f-envios", moneda:"f-moneda", instagram:"f-instagram", color:"f-color"
+};
+
+for(const [clave, id] of Object.entries(camposNegocio)){
+  const campo = document.getElementById(id);
+  const anotar = () => {
+    proyecto.negocio[clave] = campo.value;
+    if(clave === "whatsapp") avisarWhatsapp();
+    if(clave === "color")    avisarColor();
+    cambio();
+  };
+  campo.addEventListener("input", anotar);
+  campo.addEventListener("change", anotar);   /* la lista de monedas avisa por acá */
+}
+
+function avisarWhatsapp(){
+  const n = normalizarWhatsapp(proyecto.negocio.whatsapp);
+  document.getElementById("ayuda-whatsapp").textContent =
+    n ? "Va a quedar como " + n : "Con característica, sin 0 ni 15.";
+}
+
+function avisarColor(){
+  const c = contrasteConBlanco(proyecto.negocio.color || "#1E7CAB");
+  document.getElementById("ayuda-color").textContent = c < 4.5
+    ? "Ojo: con este color el texto blanco de arriba se lee poco. Probá uno más oscuro."
+    : "El color de la cabecera y los detalles.";
+}
+
+/* ═══════════════════ PRODUCTOS ═══════════════════ */
+
+const lista = document.getElementById("lista-productos");
+
+function productoVacio(){
+  return { id:nuevoId(), nombre:"", categoria:"", precio:"", detalle:"", etiqueta:"",
+           forma:"bolso", opciones:[{nombre:"Única", precio:""}], fotos:[] };
+}
+
+function dibujarProductos(){
+  lista.innerHTML = "";
+  proyecto.productos.forEach((p, i) => lista.appendChild(dibujarProducto(p, i)));
+  if(!proyecto.productos.length){
+    const vacio = document.createElement("p");
+    vacio.className = "bloque-nota";
+    vacio.style.marginBottom = "14px";
+    vacio.textContent = "Todavía no cargaste ningún producto.";
+    lista.appendChild(vacio);
+  }
+}
+
+function dibujarProducto(p, indice){
+  const caja = document.createElement("div");
+  caja.className = "producto";
+  caja.innerHTML = `
+    <div class="producto-cabecera">
+      <span class="producto-numero">${indice + 1}</span>
+      <span class="producto-nombre-vista">${escaparHtml(p.nombre) || "Producto sin nombre"}</span>
+      <button class="boton peligro chico" type="button" data-accion="borrar">Borrar</button>
+    </div>
+    <div class="campos dos">
+      <div class="campo">
+        <label>Nombre</label>
+        <input type="text" data-campo="nombre" value="${escaparHtml(p.nombre)}" placeholder="Corrector de ojeras">
+      </div>
+      <div class="campo">
+        <label>Categoría</label>
+        <input type="text" data-campo="categoria" value="${escaparHtml(p.categoria)}" placeholder="Maquillaje">
+      </div>
+      <div class="campo">
+        <label>Precio</label>
+        <input type="number" data-campo="precio" value="${escaparHtml(p.precio)}" min="0" step="1" placeholder="4300">
+      </div>
+      <div class="campo">
+        <label>Cartelito (opcional)</label>
+        <input type="text" data-campo="etiqueta" value="${escaparHtml(p.etiqueta)}" placeholder="Nuevo">
+      </div>
+    </div>
+    <div class="campo" style="margin-top:12px">
+      <label>Detalle</label>
+      <textarea data-campo="detalle" placeholder="Larga duración, varios tonos.">${escaparHtml(p.detalle)}</textarea>
+    </div>
+
+    <div class="campo" style="margin-top:12px">
+      <label>Opciones</label>
+      <span class="ayuda">Talle, medida, color… Si una vale distinto, poné su precio; si no, dejalo vacío.</span>
+      <div class="opciones-lista" data-zona="opciones"></div>
+      <button class="boton suave chico" type="button" data-accion="agregar-opcion" style="margin-top:8px;align-self:flex-start">+ Agregar opción</button>
+    </div>
+
+    <div class="campo" style="margin-top:12px">
+      <label>Fotos</label>
+      <span class="ayuda">Con <strong>Encuadrar</strong> volvés a acomodar la foto. Con la <strong>&times;</strong> de la esquina la borrás.</span>
+      <div class="fotos-tira" data-zona="fotos"></div>
+    </div>`;
+
+  /* --- campos simples --- */
+  caja.querySelectorAll("[data-campo]").forEach(campo => {
+    campo.addEventListener("input", () => {
+      p[campo.dataset.campo] = campo.value;
+      if(campo.dataset.campo === "nombre"){
+        caja.querySelector(".producto-nombre-vista").textContent = campo.value || "Producto sin nombre";
+      }
+      cambio();
+    });
+  });
+
+  caja.querySelector('[data-accion="borrar"]').onclick = () => {
+    if(!confirm("¿Borrar este producto?")) return;
+    proyecto.productos = proyecto.productos.filter(x => x.id !== p.id);
+    dibujarProductos();
+    cambio();
+  };
+
+  /* --- opciones --- */
+  const zonaOpciones = caja.querySelector('[data-zona="opciones"]');
+  function dibujarOpciones(){
+    zonaOpciones.innerHTML = "";
+    p.opciones.forEach((o, k) => {
+      const fila = document.createElement("div");
+      fila.className = "opcion-fila";
+      fila.innerHTML = `
+        <input type="text" value="${escaparHtml(o.nombre)}" placeholder="1 metro">
+        <input type="number" value="${escaparHtml(o.precio)}" min="0" step="1" placeholder="precio">
+        <button class="boton peligro chico" type="button" aria-label="Quitar opción">&times;</button>`;
+      const [campoNombre, campoPrecio, quitar] = fila.children;
+      campoNombre.addEventListener("input", () => { o.nombre = campoNombre.value; cambio(); });
+      campoPrecio.addEventListener("input", () => { o.precio = campoPrecio.value; cambio(); });
+      quitar.onclick = () => { p.opciones.splice(k,1); dibujarOpciones(); cambio(); };
+      zonaOpciones.appendChild(fila);
+    });
+  }
+  dibujarOpciones();
+  caja.querySelector('[data-accion="agregar-opcion"]').onclick = () => {
+    p.opciones.push({ nombre:"", precio:"" });
+    dibujarOpciones();
+  };
+
+  /* --- fotos --- */
+  const zonaFotos = caja.querySelector('[data-zona="fotos"]');
+  function dibujarFotos(){
+    zonaFotos.innerHTML = "";
+    p.fotos.forEach((f, k) => {
+      const chip = document.createElement("div");
+      chip.className = "foto-chip";
+      chip.innerHTML = `
+        <img src="${f.recortada}" alt="Foto ${k+1}">
+        <button type="button" class="foto-borrar" data-accion="quitar"
+                aria-label="Borrar esta foto" title="Borrar esta foto">&times;</button>
+        <div class="foto-acciones">
+          <button type="button" data-accion="encuadrar">Encuadrar</button>
+        </div>`;
+      chip.querySelector('[data-accion="encuadrar"]').onclick = () => abrirRecorte(f, () => { dibujarFotos(); cambio(); });
+      chip.querySelector('[data-accion="quitar"]').onclick = () => {
+        if(!confirm("¿Borrar esta foto?")) return;
+        p.fotos.splice(k, 1);
+        dibujarFotos();
+        cambio();
+      };
+      zonaFotos.appendChild(chip);
+    });
+    const sumar = document.createElement("button");
+    sumar.type = "button";
+    sumar.className = "foto-vacia";
+    sumar.textContent = p.fotos.length ? "+ Otra foto" : "+ Agregar foto";
+    sumar.onclick = () => pedirFotos(p, dibujarFotos);
+    zonaFotos.appendChild(sumar);
+  }
+  dibujarFotos();
+
+  return caja;
+}
+
+document.getElementById("btn-agregar").onclick = () => {
+  proyecto.productos.push(productoVacio());
+  dibujarProductos();
+  cambio();
+  lista.lastElementChild.scrollIntoView({ behavior:"smooth", block:"center" });
+};
+
+/* ═══════════════════ CARGA Y RECORTE DE FOTOS ═══════════════════ */
+
+const entradaFotos = document.getElementById("entrada-fotos");
+let alRecibirFotos = null;
+
+function pedirFotos(producto, alTerminar){
+  alRecibirFotos = { producto, alTerminar };
+  entradaFotos.value = "";
+  entradaFotos.click();
+}
+
+entradaFotos.addEventListener("change", async () => {
+  if(!alRecibirFotos) return;
+  const { producto, alTerminar } = alRecibirFotos;
+  const archivos = [...entradaFotos.files];
+  for(const archivo of archivos){
+    const original = await achicarArchivo(archivo, 1100);
+    const foto = { id:nuevoId(), original, recortada:null, encuadre:null };
+    foto.recortada = await recortarConEncuadre(original, null);
+    producto.fotos.push(foto);
+  }
+  alTerminar();
+  cambio();
+  /* La última foto se abre para encuadrar, así se entiende que se puede. */
+  if(archivos.length) abrirRecorte(producto.fotos[producto.fotos.length - 1], () => { alTerminar(); cambio(); });
+  alRecibirFotos = null;
+});
+
+function cargarImagen(src){
+  return new Promise((ok, err) => {
+    const img = new Image();
+    img.onload  = () => ok(img);
+    img.onerror = err;
+    img.src = src;
+  });
+}
+
+/* Baja la foto a un tamaño manejable antes de guardarla. */
+async function achicarArchivo(archivo, ladoMaximo){
+  const url = await new Promise(ok => {
+    const lector = new FileReader();
+    lector.onload = () => ok(lector.result);
+    lector.readAsDataURL(archivo);
+  });
+  const img = await cargarImagen(url);
+  const escala = Math.min(1, ladoMaximo / Math.max(img.width, img.height));
+  if(escala === 1 && archivo.size < 900000) return url;
+  const lienzo = document.createElement("canvas");
+  lienzo.width  = Math.round(img.width  * escala);
+  lienzo.height = Math.round(img.height * escala);
+  const pincel = lienzo.getContext("2d");
+  pincel.imageSmoothingQuality = "high";
+  pincel.drawImage(img, 0, 0, lienzo.width, lienzo.height);
+  return lienzo.toDataURL("image/jpeg", 0.86);
+}
+
+const ANCHO_FINAL = 600, ALTO_FINAL = 800;
+
+/* Cuánto se agranda la foto para el recuadro. Con "entera" se ve completa
+   y queda fondo blanco en lo que sobra; si no, tapa todo el recuadro. */
+function escalaBase(img, entera){
+  return entera
+    ? Math.min(ANCHO_FINAL / img.width, ALTO_FINAL / img.height)
+    : Math.max(ANCHO_FINAL / img.width, ALTO_FINAL / img.height);
+}
+
+/* Encuadre por defecto: centrado y sin zoom. */
+function encuadreCentrado(img, entera){
+  const base = escalaBase(img, entera);
+  return {
+    zoom:1,
+    entera: !!entera,
+    x:(ANCHO_FINAL - img.width  * base) / 2,
+    y:(ALTO_FINAL  - img.height * base) / 2
+  };
+}
+
+function dibujarEncuadre(pincel, img, encuadre){
+  const base = escalaBase(img, encuadre.entera) * encuadre.zoom;
+  pincel.fillStyle = encuadre.entera ? "#FFFFFF" : "#0E1A20";
+  pincel.fillRect(0, 0, ANCHO_FINAL, ALTO_FINAL);
+  pincel.imageSmoothingQuality = "high";
+  pincel.drawImage(img, encuadre.x, encuadre.y, img.width * base, img.height * base);
+}
+
+/* Deja la foto adentro del recuadro: si lo tapa, sin franjas en los bordes;
+   si es más chica que el recuadro, sin que se escape para afuera. */
+function acomodar(img, encuadre){
+  const base = escalaBase(img, encuadre.entera) * encuadre.zoom;
+  const dentro = (recuadro, tamano, valor) => tamano >= recuadro
+    ? Math.min(0, Math.max(recuadro - tamano, valor))
+    : Math.max(0, Math.min(recuadro - tamano, valor));
+  encuadre.x = dentro(ANCHO_FINAL, img.width  * base, encuadre.x);
+  encuadre.y = dentro(ALTO_FINAL,  img.height * base, encuadre.y);
+  return encuadre;
+}
+
+async function recortarConEncuadre(original, encuadre){
+  const img = await cargarImagen(original);
+  const uso = acomodar(img, encuadre ? { ...encuadre } : encuadreCentrado(img, false));
+  const lienzo = document.createElement("canvas");
+  lienzo.width = ANCHO_FINAL; lienzo.height = ALTO_FINAL;
+  dibujarEncuadre(lienzo.getContext("2d"), img, uso);
+  return lienzo.toDataURL("image/jpeg", 0.72);
+}
+
+/* ---------- El recortador ---------- */
+
+const velo     = document.getElementById("velo-recorte");
+const marco    = document.getElementById("marco-recorte");
+const lienzo   = document.getElementById("lienzo-recorte");
+const pincel   = lienzo.getContext("2d");
+const barraZoom = document.getElementById("f-zoom");
+const botonModoRecorte = document.getElementById("btn-modo-recorte");
+const botonModoEntera  = document.getElementById("btn-modo-entera");
+
+let fotoEnCurso = null, imgEnCurso = null, encuadreEnCurso = null, alCerrarRecorte = null;
+
+async function abrirRecorte(foto, alTerminar){
+  fotoEnCurso = foto;
+  alCerrarRecorte = alTerminar;
+  imgEnCurso = await cargarImagen(foto.original);
+  encuadreEnCurso = foto.encuadre ? { ...foto.encuadre } : encuadreCentrado(imgEnCurso, false);
+  barraZoom.value = Math.round(encuadreEnCurso.zoom * 100);
+  marcarModo();
+  pintarRecorte();
+  velo.classList.add("abierto");
+}
+
+function pintarRecorte(){
+  acomodar(imgEnCurso, encuadreEnCurso);
+  dibujarEncuadre(pincel, imgEnCurso, encuadreEnCurso);
+}
+
+function marcarModo(){
+  botonModoRecorte.classList.toggle("elegido", !encuadreEnCurso.entera);
+  botonModoEntera.classList.toggle("elegido",  !!encuadreEnCurso.entera);
+}
+
+/* Al cambiar de modo la foto se acomoda de nuevo, centrada y sin zoom. */
+function elegirModo(entera){
+  if(!imgEnCurso || !!encuadreEnCurso.entera === !!entera) return;
+  encuadreEnCurso = encuadreCentrado(imgEnCurso, entera);
+  barraZoom.value = 100;
+  marcarModo();
+  pintarRecorte();
+}
+
+botonModoRecorte.onclick = () => elegirModo(false);
+botonModoEntera.onclick  = () => elegirModo(true);
+
+barraZoom.addEventListener("input", () => {
+  const antes = encuadreEnCurso.zoom;
+  const ahora = Number(barraZoom.value) / 100;
+  /* Se agranda desde el centro, no desde la esquina. */
+  const base = escalaBase(imgEnCurso, encuadreEnCurso.entera);
+  const centroX = (ANCHO_FINAL / 2 - encuadreEnCurso.x) / (base * antes);
+  const centroY = (ALTO_FINAL  / 2 - encuadreEnCurso.y) / (base * antes);
+  encuadreEnCurso.zoom = ahora;
+  encuadreEnCurso.x = ANCHO_FINAL / 2 - centroX * base * ahora;
+  encuadreEnCurso.y = ALTO_FINAL  / 2 - centroY * base * ahora;
+  pintarRecorte();
+});
+
+let arrastrando = false, ultimoX = 0, ultimoY = 0;
+
+marco.addEventListener("pointerdown", e => {
+  arrastrando = true;
+  ultimoX = e.clientX; ultimoY = e.clientY;
+  marco.setPointerCapture(e.pointerId);
+});
+marco.addEventListener("pointermove", e => {
+  if(!arrastrando) return;
+  const caja = marco.getBoundingClientRect();
+  encuadreEnCurso.x += (e.clientX - ultimoX) * (ANCHO_FINAL / caja.width);
+  encuadreEnCurso.y += (e.clientY - ultimoY) * (ALTO_FINAL  / caja.height);
+  ultimoX = e.clientX; ultimoY = e.clientY;
+  pintarRecorte();
+});
+["pointerup","pointercancel","pointerleave"].forEach(evento =>
+  marco.addEventListener(evento, () => { arrastrando = false; }));
+
+document.getElementById("btn-recorte-cancelar").onclick = () => velo.classList.remove("abierto");
+
+document.getElementById("btn-recorte-listo").onclick = () => {
+  fotoEnCurso.encuadre  = { ...encuadreEnCurso };
+  fotoEnCurso.recortada = lienzo.toDataURL("image/jpeg", 0.72);
+  velo.classList.remove("abierto");
+  if(alCerrarRecorte) alCerrarRecorte();
+};
+
+velo.addEventListener("click", e => { if(e.target === velo) velo.classList.remove("abierto"); });
+
+/* ═══════════════════ ENTREGA ═══════════════════ */
+
+function faltantes(){
+  const n = proyecto.negocio, faltan = [];
+  if(!(n.tienda || "").trim())          faltan.push("el nombre del negocio");
+  if(!normalizarWhatsapp(n.whatsapp))   faltan.push("tu WhatsApp");
+  if(!armarProductos().length)          faltan.push("al menos un producto con nombre");
+  return faltan;
+}
+
+function archivoCatalogo(){
+  return new File([generarCatalogo()], nombreArchivo(), { type:"text/html" });
+}
+
+function bajarArchivo(nombre, contenido, tipo){
+  const url = URL.createObjectURL(new Blob([contenido], { type:tipo }));
+  const enlace = document.createElement("a");
+  enlace.href = url;
+  enlace.download = nombre;
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+const aviso = document.getElementById("aviso-envio");
+function decir(html){ aviso.innerHTML = html; }
+
+async function enviar(){
+  const faltan = faltantes();
+  if(faltan.length){
+    decir("Antes de mandarlo falta cargar <strong>" + faltan.join("</strong>, <strong>") + "</strong>.");
+    return;
+  }
+
+  const archivo = archivoCatalogo();
+  const texto = "Hola Facu, te mando el catálogo de " + proyecto.negocio.tienda + ".";
+
+  /* El camino bueno: la hoja de compartir del celular, con el archivo adjunto. */
+  if(navigator.canShare && navigator.canShare({ files:[archivo] })){
+    try{
+      await navigator.share({ files:[archivo], text:texto, title:nombreArchivo() });
+      decir("Listo. Si no lo mandaste todavía, elegí <strong>WhatsApp</strong> en la lista y buscá el contacto de Facu.");
+      return;
+    }catch(e){
+      if(e && e.name === "AbortError"){ decir("Cancelaste el envío. Podés volver a intentarlo cuando quieras."); return; }
+    }
+  }
+
+  /* Sin hoja de compartir (computadora): se descarga y se abre el chat. */
+  bajarArchivo(nombreArchivo(), generarCatalogo(), "text/html");
+  const chat = "https://wa.me/" + MI_WHATSAPP + "?text=" + encodeURIComponent(texto + " Te adjunto el archivo " + nombreArchivo() + ".");
+  decir("Tu navegador no puede adjuntar solo. Te descargué <strong>" + nombreArchivo() + "</strong> " +
+        "(fijate en Descargas) y te abro el chat: arrastrá ahí el archivo. " +
+        '<a href="' + chat + '" target="_blank" rel="noopener"><strong>Abrir el chat de Facu</strong></a>');
+  window.open(chat, "_blank", "noopener");
+}
+
+document.getElementById("btn-enviar").onclick   = enviar;
+document.getElementById("btn-enviar-2").onclick = enviar;
+
+document.getElementById("btn-descargar").onclick = () => {
+  const faltan = faltantes();
+  if(faltan.length){ decir("Falta cargar <strong>" + faltan.join("</strong>, <strong>") + "</strong>."); return; }
+  bajarArchivo(nombreArchivo(), generarCatalogo(), "text/html");
+  decir("Descargado <strong>" + nombreArchivo() + "</strong>. Abrilo con doble clic para verlo.");
+};
+
+/* ═══════════════════ VOLVER A EDITAR UN CATÁLOGO ═══════════════════ */
+
+/* Dentro del catálogo terminado va una etiqueta con los datos del creador.
+   No lleva las fotos: esas ya viajan en la lista PRODUCTOS del propio
+   catálogo, así que el archivo no engorda. */
+const MARCA_DATOS = "datos-creador";
+
+function aBase64(texto){
+  const bytes = new TextEncoder().encode(texto);
+  let crudo = "";
+  for(let i = 0; i < bytes.length; i += 8192){
+    crudo += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+  }
+  return btoa(crudo);
+}
+
+function deBase64(b64){
+  return new TextDecoder().decode(Uint8Array.from(atob(b64), c => c.charCodeAt(0)));
+}
+
+function datosCreador(){
+  return {
+    version: 1,
+    negocio: { ...proyecto.negocio },
+    /* El mismo filtro que armarProductos, para que las dos listas se emparejen. */
+    productos: proyecto.productos
+      .filter(p => (p.nombre || "").trim())
+      .map(p => ({
+        nombre:    p.nombre    || "",
+        categoria: p.categoria || "",
+        precio:    p.precio == null ? "" : String(p.precio),
+        detalle:   p.detalle   || "",
+        etiqueta:  p.etiqueta  || "",
+        forma:     p.forma     || "bolso",
+        opciones:  (p.opciones || []).map(o => ({
+                     nombre: o.nombre || "",
+                     precio: o.precio == null ? "" : String(o.precio)
+                   }))
+      }))
+  };
+}
+
+function insertarDatosCreador(html){
+  const etiqueta = '<script id="' + MARCA_DATOS + '" type="application/json">' +
+                   aBase64(JSON.stringify(datosCreador())) + '<\/script>\n';
+  const corte = html.lastIndexOf("</body>");
+  return corte < 0 ? html + etiqueta : html.slice(0, corte) + etiqueta + html.slice(corte);
+}
+
+/* Los catálogos escritos a mano usan la forma de JavaScript: claves sin
+   comillas, comas de más, comentarios. Esto lo pasa a JSON para poder leerlo. */
+function aJson(literal){
+  const partes = [];
+  for(let i = 0; i < literal.length; i++){
+    const c = literal[i];
+
+    /* comentarios: se tiran */
+    if(c === "/" && literal[i+1] === "/"){
+      while(i < literal.length && literal[i] !== "\n") i++;
+      continue;
+    }
+    if(c === "/" && literal[i+1] === "*"){
+      i += 2;
+      while(i < literal.length && !(literal[i] === "*" && literal[i+1] === "/")) i++;
+      i++;
+      continue;
+    }
+
+    /* textos: con cualquier comilla, salen siempre con comilla doble */
+    if(c === '"' || c === "'" || c === "`"){
+      let j = i + 1;
+      while(j < literal.length && literal[j] !== c){ j += literal[j] === "\\" ? 2 : 1; }
+      const crudo = literal.slice(i + 1, j);
+      i = j;
+
+      /* Las fotos son textos enormes: si ya están bien, se copian de una. */
+      if(c === '"' && !/[\n\r\t]/.test(crudo) && !/\\[^"\\/bfnrtu]/.test(crudo)){
+        partes.push('"' + crudo + '"');
+        continue;
+      }
+      let dentro = "";
+      for(let k = 0; k < crudo.length; k++){
+        const d = crudo[k];
+        if(d === "\\"){
+          const e = crudo[k+1] || "";
+          dentro += (e === "'" || e === "`" || /[^"\\/bfnrtu]/.test(e)) ? e : d + e;
+          k++;
+        }
+        else if(d === '"')  dentro += '\\"';
+        else if(d === "\n") dentro += "\\n";
+        else if(d === "\t") dentro += "\\t";
+        else if(d !== "\r") dentro += d;
+      }
+      partes.push('"' + dentro + '"');
+      continue;
+    }
+
+    /* palabras: si es una clave, va entre comillas */
+    if(/[A-Za-z_$]/.test(c)){
+      let j = i;
+      while(j < literal.length && /[\w$]/.test(literal[j])) j++;
+      const palabra = literal.slice(i, j);
+      let k = j;
+      while(k < literal.length && /\s/.test(literal[k])) k++;
+      partes.push(literal[k] === ":" ? '"' + palabra + '"'
+                : palabra === "undefined" ? "null"
+                : palabra);
+      i = j - 1;
+      continue;
+    }
+
+    if(/\s/.test(c)) continue;                       /* afuera de los textos no hace falta */
+    if((c === "]" || c === "}") && partes[partes.length - 1] === ",") partes.pop();  /* coma de más */
+    partes.push(c);
+  }
+  return partes.join("");
+}
+
+/* Saca la lista PRODUCTOS del archivo contando corchetes, sin confundirse
+   con los que puedan aparecer adentro de un texto. */
+function extraerProductos(texto){
+  const marca = texto.indexOf("const PRODUCTOS");
+  if(marca < 0) return null;
+  const inicio = texto.indexOf("[", marca);
+  if(inicio < 0) return null;
+
+  let nivel = 0, comilla = "", escape = false;
+  for(let i = inicio; i < texto.length; i++){
+    const c = texto[i];
+    if(comilla){
+      if(escape)              escape = false;
+      else if(c === "\\")     escape = true;
+      else if(c === comilla)  comilla = "";
+      continue;
+    }
+    if(c === '"' || c === "'" || c === "`"){ comilla = c; continue; }
+    if(c === "/" && texto[i+1] === "/"){                     /* comentario de una línea */
+      while(i < texto.length && texto[i] !== "\n") i++;
+      continue;
+    }
+    if(c === "/" && texto[i+1] === "*"){                     /* comentario largo */
+      i += 2;
+      while(i < texto.length && !(texto[i] === "*" && texto[i+1] === "/")) i++;
+      i++;
+      continue;
+    }
+    if(c === "[") nivel++;
+    else if(c === "]"){
+      nivel--;
+      if(nivel === 0){
+        const trozo = texto.slice(inicio, i + 1);
+        try{ return JSON.parse(trozo); }catch(e){ /* no es JSON: puede estar escrito a mano */ }
+        try{ return JSON.parse(aJson(trozo)); }catch(e){ return null; }
+      }
+    }
+  }
+  return null;
+}
+
+/* Para los archivos viejos: lee const NOMBRE = "..." del catálogo. */
+function textoEntreComillas(texto, nombre){
+  const m = texto.match(new RegExp("const\\s+" + nombre + "\\s*=\\s*\"((?:[^\"\\\\]|\\\\.)*)\""));
+  if(!m) return "";
+  try{ return JSON.parse('"' + m[1] + '"'); }catch(e){ return m[1]; }
+}
+
+function opcionesDesdeTallas(tallas){
+  const lista = (Array.isArray(tallas) ? tallas : [])
+    .map(t => (t && typeof t === "object")
+      ? { nombre: String(t.nombre || ""), precio: t.precio == null ? "" : String(t.precio) }
+      : { nombre: String(t == null ? "" : t), precio: "" })
+    .filter(o => o.nombre.trim());
+  return lista.length ? lista : [{ nombre:"Única", precio:"" }];
+}
+
+/* Devuelve { negocio, productos } o null si el archivo no es un catálogo. */
+function leerCatalogo(texto){
+  const productosCatalogo = extraerProductos(texto);
+  if(!productosCatalogo) return null;
+
+  const documento = new DOMParser().parseFromString(texto, "text/html");
+
+  let datos = null;
+  const guardado = documento.getElementById(MARCA_DATOS);
+  if(guardado){
+    try{ datos = JSON.parse(deBase64(guardado.textContent.trim())); }catch(e){ datos = null; }
+  }
+
+  const negocio = { tienda:"", whatsapp:"", frase:"", horario:"", envios:"",
+                    moneda:"$", instagram:"", color:"#1E7CAB" };
+
+  if(datos && datos.negocio){
+    Object.assign(negocio, datos.negocio);
+  }else{
+    /* Catálogo hecho antes de que existiera esta función: lo leemos del propio catálogo. */
+    const leerTextoDe = el => (el ? el.textContent.trim() : "");
+    const cartelitos  = documento.querySelectorAll(".datos .dato");
+    negocio.tienda    = leerTextoDe(documento.querySelector(".marca")) || textoEntreComillas(texto, "TIENDA");
+    negocio.frase     = leerTextoDe(documento.querySelector(".lema"));
+    negocio.envios    = leerTextoDe(cartelitos[0]);
+    negocio.horario   = leerTextoDe(cartelitos[1]);
+    negocio.whatsapp  = textoEntreComillas(texto, "WHATSAPP");
+    negocio.moneda    = textoEntreComillas(texto, "MONEDA") || "$";
+    const ig    = documento.querySelector(".contacto-ig");
+    const donde = ig ? ig.getAttribute("href") : "";
+    negocio.instagram = (donde && donde !== "#") ? donde : "";
+    const color = (texto.match(/--vino:\s*(#[0-9a-fA-F]{3,8})/) || [])[1];
+    if(color) negocio.color = color;
+  }
+
+  /* Los datos guardados sólo sirven si las dos listas tienen el mismo largo. */
+  const metas = (datos && Array.isArray(datos.productos) && datos.productos.length === productosCatalogo.length)
+    ? datos.productos : null;
+
+  const productos = productosCatalogo.map((pc, i) => {
+    const meta = metas ? metas[i] : null;
+    /* Se guarda la foto ya encuadrada: sirve igual para mostrar y para volver a encuadrar. */
+    const fotos = (Array.isArray(pc.fotos) ? pc.fotos : [])
+      .filter(Boolean)
+      .map(src => ({ id:nuevoId(), original:src, recortada:src, encuadre:null }));
+    return {
+      id:        nuevoId(),
+      nombre:    meta ? meta.nombre    : (pc.nombre || ""),
+      categoria: meta ? meta.categoria : (pc.categoria || ""),
+      precio:    meta ? meta.precio    : (pc.precio == null ? "" : String(pc.precio)),
+      detalle:   meta ? meta.detalle   : (pc.detalle || ""),
+      etiqueta:  meta ? meta.etiqueta  : (pc.etiqueta || ""),
+      forma:     (meta && meta.forma) || pc.forma || "bolso",
+      opciones:  (meta && meta.opciones && meta.opciones.length) ? meta.opciones : opcionesDesdeTallas(pc.tallas),
+      fotos
+    };
+  });
+
+  return { negocio, productos };
+}
+
+function aplicarProyecto(nuevo){
+  Object.assign(proyecto.negocio, nuevo.negocio);
+  proyecto.productos = nuevo.productos;
+
+  const porDefecto = { moneda:"$", color:"#1E7CAB" };
+  for(const [clave, id] of Object.entries(camposNegocio)){
+    document.getElementById(id).value = proyecto.negocio[clave] || porDefecto[clave] || "";
+  }
+  avisarWhatsapp();
+  avisarColor();
+  dibujarProductos();
+  cambio();
+}
+
+const entradaCatalogo = document.getElementById("entrada-catalogo");
+const avisoSubir      = document.getElementById("aviso-subir");
+function decirSubir(html){ avisoSubir.innerHTML = html; }
+
+function leerTextoDeArchivo(archivo){
+  if(archivo.text) return archivo.text();
+  return new Promise((ok, err) => {
+    const lector = new FileReader();
+    lector.onload  = () => ok(lector.result);
+    lector.onerror = () => err(lector.error);
+    lector.readAsText(archivo);
+  });
+}
+
+document.getElementById("btn-subir").onclick = () => {
+  entradaCatalogo.value = "";
+  entradaCatalogo.click();
+};
+
+entradaCatalogo.addEventListener("change", async () => {
+  const archivo = entradaCatalogo.files[0];
+  if(!archivo) return;
+  decirSubir("Abriendo <strong>" + escaparHtml(archivo.name) + "</strong>…");
+
+  let texto = "";
+  try{
+    texto = await leerTextoDeArchivo(archivo);
+  }catch(e){
+    decirSubir("No pude leer ese archivo. Probá de nuevo.");
+    return;
+  }
+
+  let leido = null;
+  try{ leido = leerCatalogo(texto); }catch(e){ leido = null; }
+  if(!leido){
+    decirSubir("Ese archivo no parece un catálogo. Tiene que ser el <strong>.html</strong> que descargaste desde acá.");
+    return;
+  }
+
+  const hayTrabajo = (proyecto.negocio.tienda || "").trim() || proyecto.productos.length;
+  if(hayTrabajo && !confirm("Se va a reemplazar lo que tenés cargado ahora por el catálogo del archivo. ¿Seguimos?")){
+    decirSubir("No toqué nada. Lo que tenías cargado sigue igual.");
+    return;
+  }
+
+  aplicarProyecto(leido);
+  decirSubir("Listo, cargué <strong>" + escaparHtml(leido.negocio.tienda || "tu catálogo") + "</strong> con " +
+             leido.productos.length + (leido.productos.length === 1 ? " producto" : " productos") +
+             ". Editá lo que quieras y después tocá <strong>Enviármelo por WhatsApp</strong>.");
+  window.scrollTo({ top:0, behavior:"smooth" });
+});
+
+/* ═══════════════════ ARRANQUE ═══════════════════ */
+
+(async function arrancar(){
+  const guardado = await recuperar();
+  if(guardado){
+    Object.assign(proyecto.negocio, guardado.negocio || {});
+    proyecto.productos = guardado.productos || [];
+    /* Los identificadores tienen que seguir siendo únicos. */
+    proyecto.productos.forEach(p => {
+      const n = parseInt(String(p.id).replace("p",""), 10);
+      if(n >= siguienteId) siguienteId = n + 1;
+    });
+    for(const [clave, id] of Object.entries(camposNegocio)){
+      if(proyecto.negocio[clave]) document.getElementById(id).value = proyecto.negocio[clave];
+    }
+  }
+  avisarWhatsapp();
+  avisarColor();
+  dibujarProductos();
+  refrescarBarra();
+  refrescarVista();
+  decir("Cuando termines, tocá <strong>Enviármelo por WhatsApp</strong>. Se abre la lista para compartir del celular: elegí WhatsApp y el archivo va adjunto solo.");
+})();
+</script>
+</body>
+</html>
