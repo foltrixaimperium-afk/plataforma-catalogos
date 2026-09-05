@@ -343,3 +343,13 @@ create policy "fotos borrar" on storage.objects
   for delete to authenticated
   using (bucket_id = 'fotos'
          and public.puede_editar_carpeta((storage.foldername(name))[1]));
+
+
+-- ─────────────────────────────────────────────────────────────
+--  6. EL LOGO
+--     Igual que las fotos de producto: se guarda el original y
+--     cómo quedó encuadrado, para poder reacomodarlo cuando sea.
+-- ─────────────────────────────────────────────────────────────
+
+alter table public.tiendas add column if not exists logo_url_original text;
+alter table public.tiendas add column if not exists logo_encuadre jsonb;

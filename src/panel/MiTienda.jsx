@@ -1,9 +1,25 @@
 import { useRef, useState } from "react";
 import { guardarTienda } from "../lib/datos";
-import { subir, rutaLogo } from "../lib/almacen";
-import { achicarArchivo } from "../lib/imagenes";
+import { subir, rutaLogo, rutaLogoOriginal, rutaDesdeUrl } from "../lib/almacen";
+import { achicarArchivo, recortar, MEDIDA_LOGO } from "../lib/imagenes";
 import { normalizarWhatsapp, contrasteConBlanco } from "../lib/formato";
 import { enCastellano } from "../lib/supabase";
+import Recortador from "./Recortador";
+
+/** Trae una imagen ya guardada para poder volver a encuadrarla. */
+function urlADataUrl(url) {
+  return fetch(url)
+    .then((r) => r.blob())
+    .then(
+      (b) =>
+        new Promise((ok, err) => {
+          const lector = new FileReader();
+          lector.onload = () => ok(lector.result);
+          lector.onerror = err;
+          lector.readAsDataURL(b);
+        })
+    );
+}
 
 export default function MiTienda({ tienda, onGuardada }) {
   const [f, setF] = useState({
@@ -16,8 +32,17 @@ export default function MiTienda({ tienda, onGuardada }) {
     moneda:    tienda.moneda || "$",
     color:     tienda.color || "#1E7CAB"
   });
-  const [logo, setLogo]           = useState(tienda.logo_url || "");
-  const [logoBlob, setLogoBlob]   = useState(null);
+  /* El logo se maneja igual que las fotos de producto: se guarda el
+     original y cómo quedó encuadrado, para poder reacomodarlo después
+     sin volver a subirlo. */
+  const [logo, setLogo]                 = useState(tienda.logo_url || "");
+  const [logoBlob, setLogoBlob]         = useState(null);
+  const [logoOriginal, setLogoOriginal] = useState(null);   // dataURL para reencuadrar
+  const [logoOriginalBlob, setLogoOriginalBlob] = useState(null);
+  const [logoEncuadre, setLogoEncuadre] = useState(tienda.logo_encuadre || null);
+  const [recortando, setRecortando]     = useState(null);
+  const [trabajando, setTrabajando]     = useState("");
+
   const [guardando, setGuardando] = useState(false);
   const [error, setError]         = useState("");
   const [bien, setBien]           = useState("");
@@ -35,14 +60,59 @@ export default function MiTienda({ tienda, onGuardada }) {
     const archivo = e.target.files[0];
     e.target.value = "";
     if (!archivo) return;
+
+    setTrabajando("Preparando la imagen…");
     try {
-      const { dataUrl, blob } = await achicarArchivo(archivo, 400);
-      setLogo(dataUrl);
-      setLogoBlob(blob);
+      const original = await achicarArchivo(archivo);
+      setLogoOriginal(original.dataUrl);
+      setLogoOriginalBlob(original.blob);
       setBien("");
+      /* Arranca con la imagen entera: en un logo, cortar suele ser peor. */
+      setRecortando({ dataUrl: original.dataUrl, encuadre: null });
     } catch {
       setError("No pudimos leer esa imagen. Probá con otra.");
     }
+    setTrabajando("");
+  }
+
+  /** Volver a encuadrar el logo que ya está guardado. */
+  async function acomodarLogo() {
+    if (logoOriginal) {
+      setRecortando({ dataUrl: logoOriginal, encuadre: logoEncuadre });
+      return;
+    }
+    if (!tienda.logo_url_original) {
+      setError("Este logo es de antes y no se puede reacomodar. Subilo de nuevo.");
+      return;
+    }
+    setTrabajando("Buscando la imagen…");
+    try {
+      const dataUrl = await urlADataUrl(tienda.logo_url_original);
+      setLogoOriginal(dataUrl);
+      setRecortando({ dataUrl, encuadre: logoEncuadre });
+    } catch {
+      setError("No pudimos traer la imagen. Revisá la conexión.");
+    }
+    setTrabajando("");
+  }
+
+  async function confirmarRecorte(encuadre) {
+    const { dataUrl } = recortando;
+    setRecortando(null);
+    setTrabajando("Acomodando…");
+    const { blob } = await recortar(dataUrl, encuadre, MEDIDA_LOGO);
+    setLogo(URL.createObjectURL(blob));
+    setLogoBlob(blob);
+    setLogoEncuadre(encuadre);
+    setTrabajando("");
+  }
+
+  function sacarLogo() {
+    setLogo("");
+    setLogoBlob(null);
+    setLogoOriginal(null);
+    setLogoOriginalBlob(null);
+    setLogoEncuadre(null);
   }
 
   async function guardar(e) {
@@ -54,9 +124,17 @@ export default function MiTienda({ tienda, onGuardada }) {
 
     setGuardando(true);
     try {
-      let logo_url = tienda.logo_url;
+      let logo_url          = logo ? tienda.logo_url : null;
+      let logo_url_original = logo ? tienda.logo_url_original : null;
+
       if (logoBlob) {
-        logo_url = await subir(rutaLogo(tienda.id, logoBlob), logoBlob);
+        const ruta = rutaDesdeUrl(tienda.logo_url) || rutaLogo(tienda.id, logoBlob);
+        logo_url = await subir(ruta, logoBlob);
+      }
+      if (logoOriginalBlob) {
+        const ruta = rutaDesdeUrl(tienda.logo_url_original)
+                  || rutaLogoOriginal(tienda.id, logoOriginalBlob);
+        logo_url_original = await subir(ruta, logoOriginalBlob);
       }
 
       await guardarTienda(tienda.id, {
@@ -68,10 +146,13 @@ export default function MiTienda({ tienda, onGuardada }) {
         horario:   f.horario.trim() || null,
         moneda:    f.moneda,
         color:     f.color,
-        logo_url
+        logo_url,
+        logo_url_original,
+        logo_encuadre: logo ? logoEncuadre : null
       });
 
       setLogoBlob(null);
+      setLogoOriginalBlob(null);
       setBien("Listo, se guardó.");
       onGuardada();
     } catch (err) {
@@ -96,21 +177,27 @@ export default function MiTienda({ tienda, onGuardada }) {
           </span>
           <div className="fotos-tira">
             {logo && (
-              <div className="foto-chip" style={{ aspectRatio: "1/1" }}>
-                <img src={logo} alt="" style={{ objectFit: "contain", background: "#fff" }} />
+              <div className="foto-chip" style={{ aspectRatio: "1/1", width: 116 }}>
+                <img src={logo} alt="" style={{ background: "#fff" }} />
                 <button
                   type="button" className="foto-borrar" aria-label="Sacar el logo"
-                  onClick={() => { setLogo(""); setLogoBlob(null); }}
+                  onClick={sacarLogo}
                 >×</button>
+                <div className="foto-acciones">
+                  <button type="button" onClick={acomodarLogo}>Acomodar</button>
+                </div>
               </div>
             )}
             <button
-              type="button" className="foto-vacia" style={{ aspectRatio: "1/1" }}
+              type="button" className="foto-vacia" style={{ aspectRatio: "1/1", width: 116 }}
               onClick={() => entradaLogo.current.click()}
             >
               {logo ? "Cambiar" : "+ Subir logo"}
             </button>
           </div>
+
+          {trabajando && <div className="aviso" style={{ marginTop: 10 }}>{trabajando}</div>}
+
           <input ref={entradaLogo} type="file" accept="image/*" hidden onChange={elegirLogo} />
         </div>
 
@@ -201,6 +288,19 @@ export default function MiTienda({ tienda, onGuardada }) {
           {guardando ? "Guardando…" : "Guardar cambios"}
         </button>
       </div>
+
+      {recortando && (
+        <Recortador
+          dataUrl={recortando.dataUrl}
+          encuadre={recortando.encuadre}
+          medida={MEDIDA_LOGO}
+          enteraPorDefecto
+          titulo="Acomodá tu logo"
+          nota="Movelo con el dedo y agrandalo con la barrita. Si es un logo con letras, conviene dejarlo entero con fondo blanco."
+          onCancelar={() => setRecortando(null)}
+          onListo={confirmarRecorte}
+        />
+      )}
     </form>
   );
 }

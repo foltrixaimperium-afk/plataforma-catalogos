@@ -1,15 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  ANCHO_FINAL, ALTO_FINAL,
+  MEDIDA_PRODUCTO,
   cargarImagen, encuadreCentrado, dibujarEncuadre, acomodar, aplicarZoom
 } from "../lib/imagenes";
 
-/* La pantalla para acomodar la foto adentro del recuadro.
+/* La pantalla para acomodar una imagen adentro del recuadro.
    Es la misma del generador original: se arrastra con el dedo,
    se agranda con la barrita, y se puede elegir entre llenar el
-   recuadro o mostrar la foto entera con fondo blanco. */
+   recuadro o mostrar la imagen entera con fondo blanco.
 
-export default function Recortador({ dataUrl, encuadre, onCancelar, onListo }) {
+   Sirve igual para las fotos de producto (verticales) y para el
+   logo (cuadrado): la medida entra por parámetro. */
+
+export default function Recortador({
+  dataUrl,
+  encuadre,
+  medida = MEDIDA_PRODUCTO,
+  enteraPorDefecto = false,
+  titulo = "Acomodá la foto",
+  nota = "Movela con el dedo y agrandala con la barrita, hasta que se vea como querés.",
+  onCancelar,
+  onListo
+}) {
   const lienzoRef = useRef(null);
   const marcoRef  = useRef(null);
   const imgRef    = useRef(null);
@@ -22,8 +34,8 @@ export default function Recortador({ dataUrl, encuadre, onCancelar, onListo }) {
   function pintar() {
     const img = imgRef.current;
     if (!img || !lienzoRef.current) return;
-    acomodar(img, encuadreRef.current);
-    dibujarEncuadre(lienzoRef.current.getContext("2d"), img, encuadreRef.current);
+    acomodar(img, encuadreRef.current, medida);
+    dibujarEncuadre(lienzoRef.current.getContext("2d"), img, encuadreRef.current, medida);
   }
 
   useEffect(() => {
@@ -32,7 +44,9 @@ export default function Recortador({ dataUrl, encuadre, onCancelar, onListo }) {
       const img = await cargarImagen(dataUrl);
       if (!vivo) return;
       imgRef.current = img;
-      encuadreRef.current = encuadre ? { ...encuadre } : encuadreCentrado(img, false);
+      encuadreRef.current = encuadre
+        ? { ...encuadre }
+        : encuadreCentrado(img, enteraPorDefecto, medida);
       setEntera(!!encuadreRef.current.entera);
       setZoom(Math.round(encuadreRef.current.zoom * 100));
       setListaImagen(true);
@@ -42,11 +56,11 @@ export default function Recortador({ dataUrl, encuadre, onCancelar, onListo }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataUrl]);
 
-  /* Al cambiar de modo la foto se acomoda de nuevo, centrada y sin zoom. */
+  /* Al cambiar de modo la imagen se acomoda de nuevo, centrada y sin zoom. */
   function elegirModo(nuevoEntera) {
     const img = imgRef.current;
     if (!img || entera === nuevoEntera) return;
-    encuadreRef.current = encuadreCentrado(img, nuevoEntera);
+    encuadreRef.current = encuadreCentrado(img, nuevoEntera, medida);
     setEntera(nuevoEntera);
     setZoom(100);
     pintar();
@@ -55,7 +69,7 @@ export default function Recortador({ dataUrl, encuadre, onCancelar, onListo }) {
   function cambiarZoom(valor) {
     const img = imgRef.current;
     if (!img) return;
-    encuadreRef.current = aplicarZoom(img, encuadreRef.current, valor / 100);
+    encuadreRef.current = aplicarZoom(img, encuadreRef.current, valor / 100, medida);
     setZoom(valor);
     pintar();
   }
@@ -70,8 +84,8 @@ export default function Recortador({ dataUrl, encuadre, onCancelar, onListo }) {
   function alMover(e) {
     if (!arrastre.current.activo || !imgRef.current) return;
     const caja = marcoRef.current.getBoundingClientRect();
-    encuadreRef.current.x += (e.clientX - arrastre.current.x) * (ANCHO_FINAL / caja.width);
-    encuadreRef.current.y += (e.clientY - arrastre.current.y) * (ALTO_FINAL  / caja.height);
+    encuadreRef.current.x += (e.clientX - arrastre.current.x) * (medida.ancho / caja.width);
+    encuadreRef.current.y += (e.clientY - arrastre.current.y) * (medida.alto  / caja.height);
     arrastre.current.x = e.clientX;
     arrastre.current.y = e.clientY;
     pintar();
@@ -83,21 +97,20 @@ export default function Recortador({ dataUrl, encuadre, onCancelar, onListo }) {
   return (
     <div className="velo" onClick={(e) => { if (e.target === e.currentTarget) onCancelar(); }}>
       <div className="recortador">
-        <h3>Acomodá la foto</h3>
-        <p className="nota">
-          Movela con el dedo y agrandala con la barrita, hasta que se vea como querés.
-        </p>
+        <h3>{titulo}</h3>
+        <p className="nota">{nota}</p>
 
         <div
           className="marco"
           ref={marcoRef}
+          style={{ aspectRatio: `${medida.ancho} / ${medida.alto}` }}
           onPointerDown={alBajar}
           onPointerMove={alMover}
           onPointerUp={alSoltar}
           onPointerCancel={alSoltar}
           onPointerLeave={alSoltar}
         >
-          <canvas ref={lienzoRef} width={ANCHO_FINAL} height={ALTO_FINAL} />
+          <canvas ref={lienzoRef} width={medida.ancho} height={medida.alto} />
         </div>
 
         <div className="zoom">
@@ -125,7 +138,7 @@ export default function Recortador({ dataUrl, encuadre, onCancelar, onListo }) {
             className={"boton suave" + (entera ? " elegido" : "")}
             onClick={() => elegirModo(true)}
           >
-            Foto entera, con fondo blanco
+            Entera, con fondo blanco
           </button>
         </div>
 

@@ -52,3 +52,7 @@ export async function borrar(urls) {
   if (!rutas.length) return;
   await supabase.storage.from(BALDE).remove(rutas);
 }
+
+export function rutaLogoOriginal(tiendaId, blob) {
+  return `${tiendaId}/logo-original.${extension(blob)}`;
+}

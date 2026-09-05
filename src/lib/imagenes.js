@@ -9,8 +9,11 @@
    una foto de 5 MB termina viajando como 50 KB.
    ═══════════════════════════════════════════════════════════════════ */
 
-export const ANCHO_FINAL = 600;
-export const ALTO_FINAL  = 800;
+/* Las dos medidas que usa la app. Las fotos de producto son verticales
+   (3:4, como Instagram); el logo es cuadrado, porque así se ve mejor en la
+   cabecera y en la miniatura de WhatsApp. */
+export const MEDIDA_PRODUCTO = { ancho: 600, alto: 800 };
+export const MEDIDA_LOGO     = { ancho: 600, alto: 600 };
 
 /** Tamaño máximo que se guarda de la foto sin recortar, para poder
  *  volver a encuadrarla después sin que pierda calidad. */
@@ -71,67 +74,71 @@ export async function achicarArchivo(archivo, ladoMaximo = LADO_ORIGINAL) {
 
 /** Cuánto se agranda la foto para el recuadro. Con "entera" se ve completa
  *  y queda fondo blanco en lo que sobra; si no, tapa todo el recuadro. */
-export function escalaBase(img, entera) {
+export function escalaBase(img, entera, medida = MEDIDA_PRODUCTO) {
   return entera
-    ? Math.min(ANCHO_FINAL / img.width, ALTO_FINAL / img.height)
-    : Math.max(ANCHO_FINAL / img.width, ALTO_FINAL / img.height);
+    ? Math.min(medida.ancho / img.width, medida.alto / img.height)
+    : Math.max(medida.ancho / img.width, medida.alto / img.height);
 }
 
 /** Encuadre por defecto: centrado y sin zoom. */
-export function encuadreCentrado(img, entera) {
-  const base = escalaBase(img, entera);
+export function encuadreCentrado(img, entera, medida = MEDIDA_PRODUCTO) {
+  const base = escalaBase(img, entera, medida);
   return {
     zoom: 1,
     entera: !!entera,
-    x: (ANCHO_FINAL - img.width  * base) / 2,
-    y: (ALTO_FINAL  - img.height * base) / 2
+    x: (medida.ancho - img.width  * base) / 2,
+    y: (medida.alto  - img.height * base) / 2
   };
 }
 
-export function dibujarEncuadre(pincel, img, encuadre) {
-  const base = escalaBase(img, encuadre.entera) * encuadre.zoom;
+export function dibujarEncuadre(pincel, img, encuadre, medida = MEDIDA_PRODUCTO) {
+  const base = escalaBase(img, encuadre.entera, medida) * encuadre.zoom;
   pincel.fillStyle = encuadre.entera ? "#FFFFFF" : "#0E1A20";
-  pincel.fillRect(0, 0, ANCHO_FINAL, ALTO_FINAL);
+  pincel.fillRect(0, 0, medida.ancho, medida.alto);
   pincel.imageSmoothingQuality = "high";
   pincel.drawImage(img, encuadre.x, encuadre.y, img.width * base, img.height * base);
 }
 
 /** Deja la foto adentro del recuadro: si lo tapa, sin franjas en los bordes;
  *  si es más chica que el recuadro, sin que se escape para afuera. */
-export function acomodar(img, encuadre) {
-  const base = escalaBase(img, encuadre.entera) * encuadre.zoom;
+export function acomodar(img, encuadre, medida = MEDIDA_PRODUCTO) {
+  const base = escalaBase(img, encuadre.entera, medida) * encuadre.zoom;
   const dentro = (recuadro, tamano, valor) =>
     tamano >= recuadro
       ? Math.min(0, Math.max(recuadro - tamano, valor))
       : Math.max(0, Math.min(recuadro - tamano, valor));
-  encuadre.x = dentro(ANCHO_FINAL, img.width  * base, encuadre.x);
-  encuadre.y = dentro(ALTO_FINAL,  img.height * base, encuadre.y);
+  encuadre.x = dentro(medida.ancho, img.width  * base, encuadre.x);
+  encuadre.y = dentro(medida.alto,  img.height * base, encuadre.y);
   return encuadre;
 }
 
 /** Al mover el zoom, agranda desde el centro y no desde la esquina. */
-export function aplicarZoom(img, encuadre, nuevoZoom) {
-  const base = escalaBase(img, encuadre.entera);
+export function aplicarZoom(img, encuadre, nuevoZoom, medida = MEDIDA_PRODUCTO) {
+  const base = escalaBase(img, encuadre.entera, medida);
   const antes = encuadre.zoom;
-  const centroX = (ANCHO_FINAL / 2 - encuadre.x) / (base * antes);
-  const centroY = (ALTO_FINAL  / 2 - encuadre.y) / (base * antes);
+  const centroX = (medida.ancho / 2 - encuadre.x) / (base * antes);
+  const centroY = (medida.alto  / 2 - encuadre.y) / (base * antes);
   return {
     ...encuadre,
     zoom: nuevoZoom,
-    x: ANCHO_FINAL / 2 - centroX * base * nuevoZoom,
-    y: ALTO_FINAL  / 2 - centroY * base * nuevoZoom
+    x: medida.ancho / 2 - centroX * base * nuevoZoom,
+    y: medida.alto  / 2 - centroY * base * nuevoZoom
   };
 }
 
-/** Genera la foto final 600x800 que va a ver el público. */
-export async function recortar(dataUrlOriginal, encuadre) {
+/** Genera la imagen final que va a ver el público. */
+export async function recortar(dataUrlOriginal, encuadre, medida = MEDIDA_PRODUCTO) {
   const img = await cargarImagen(dataUrlOriginal);
-  const uso = acomodar(img, encuadre ? { ...encuadre } : encuadreCentrado(img, false));
+  const uso = acomodar(
+    img,
+    encuadre ? { ...encuadre } : encuadreCentrado(img, false, medida),
+    medida
+  );
 
   const lienzo = document.createElement("canvas");
-  lienzo.width  = ANCHO_FINAL;
-  lienzo.height = ALTO_FINAL;
-  dibujarEncuadre(lienzo.getContext("2d"), img, uso);
+  lienzo.width  = medida.ancho;
+  lienzo.height = medida.alto;
+  dibujarEncuadre(lienzo.getContext("2d"), img, uso, medida);
 
   return { blob: await lienzoABlob(lienzo, 0.78), encuadre: uso };
 }
