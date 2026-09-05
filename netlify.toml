@@ -4,7 +4,7 @@
 #  Sin barra al final.
 # ══════════════════════════════════════════════════════════════════
 [build.environment]
-  VITE_SITE_URL = "https://tu-sitio.netlify.app"
+  VITE_SITE_URL = "https://tu-catalogo-web.netlify.app"
 
 [build]
   command = "npm run build"
