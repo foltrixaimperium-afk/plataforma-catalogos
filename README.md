@@ -4,6 +4,8 @@ Un solo sitio, muchos catálogos. Cada cliente tiene el suyo en
 `misitio.com/nombre-de-su-tienda`, lo edita solo desde el celular, y los
 pedidos le llegan por WhatsApp.
 
+**En vivo:** https://tu-catalogo-web.netlify.app
+
 ---
 
 ## La dirección del sitio se escribe en un solo lugar
