@@ -5,6 +5,7 @@ import RutaProtegida from "./auth/RutaProtegida";
 import Entrar from "./paginas/Entrar";
 import Panel from "./paginas/Panel";
 import Admin from "./paginas/Admin";
+import AdminCobros from "./paginas/AdminCobros";
 import AdminTienda from "./paginas/AdminTienda";
 import Catalogo from "./publico/Catalogo";
 
@@ -50,6 +51,10 @@ export default function App() {
           <Route
             path="/admin"
             element={<RutaProtegida soloAdmin><Admin /></RutaProtegida>}
+          />
+          <Route
+            path="/admin/cobros"
+            element={<RutaProtegida soloAdmin><AdminCobros /></RutaProtegida>}
           />
           <Route
             path="/admin/tienda/:id"

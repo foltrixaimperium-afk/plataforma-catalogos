@@ -4,8 +4,10 @@ import { supabase, enCastellano } from "../lib/supabase";
 import { useSesion } from "../auth/Sesion";
 import { linkCatalogo, linkCatalogoCorto } from "../config/sitio";
 import { aSlug } from "../lib/formato";
+import { comoVa, estado } from "../lib/cobros";
 import CrearCliente from "../admin/CrearCliente";
 import CambiarClave from "../admin/CambiarClave";
+import AvisoVencimientos from "../admin/AvisoVencimientos";
 
 export default function Admin() {
   const { sesion, salir } = useSesion();
@@ -69,6 +71,8 @@ export default function Admin() {
       </header>
 
       <div className="contenido">
+        {!creando && !cargando && <AvisoVencimientos tiendas={tiendas} />}
+
         {creando ? (
           <CrearCliente
             onListo={() => { setCreando(false); cargar(); }}
@@ -84,9 +88,14 @@ export default function Admin() {
             <p className="bloque-nota">
               Entraste como administrador con {sesion?.user?.email}.
             </p>
-            <button type="button" className="boton" onClick={() => setCreando(true)}>
-              + Crear un cliente
-            </button>
+            <div className="fila-botones">
+              <button type="button" className="boton" onClick={() => setCreando(true)}>
+                + Crear un cliente
+              </button>
+              <Link className="boton suave" to="/admin/cobros">
+                Vencimientos y cobros
+              </Link>
+            </div>
           </div>
         )}
 
@@ -111,6 +120,9 @@ export default function Admin() {
               <span className={"pastilla " + (t.activa ? "verde" : "gris")}>
                 {t.activa ? "Publicada" : "De baja"}
               </span>
+              {estado(t.vence) !== "sinfecha" && (
+                <span className={"pastilla " + estado(t.vence)}>{comoVa(t.vence)}</span>
+              )}
             </div>
 
             <div className="campos" style={{ gap: 10 }}>

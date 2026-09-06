@@ -33,6 +33,7 @@ Quien lee esa línea es `src/config/sitio.js`, y nadie más.
 |---|---|
 | Pantallas del cliente y del admin | `src/` |
 | Catálogo público | `src/publico/` |
+| Vencimientos y cobros | `src/paginas/AdminCobros.jsx` |
 | Base de datos y sus candados | `supabase/schema.sql` |
 | Alta de cuentas (corre en Supabase) | `supabase/functions/admin-clientes/` |
 | Miniatura de WhatsApp (corre en Netlify) | `netlify/edge-functions/og.js` |
@@ -49,6 +50,7 @@ Quien lee esa línea es `src/config/sitio.js`, y nadie más.
 | `/entrar` | Iniciar sesión |
 | `/panel` | El panel del cliente |
 | `/admin` | La lista de clientes |
+| `/admin/cobros` | Vencimientos, cobros e historial de pagos |
 | `/admin/tienda/:id` | Editar la tienda de un cliente |
 | `/:slug` | El catálogo público |
 
@@ -77,13 +79,15 @@ la página. Aunque alguien manipule el navegador, la base lo rechaza igual.
 - El público lee las tiendas publicadas, y nada más
 - Cada cliente escribe solo en su tienda
 - Nadie se hace administrador a sí mismo
-- El cliente no cambia su dirección web, su plan ni si está publicada
+- El cliente no cambia su dirección web, su plan, su vencimiento ni si está publicada
+- Los pagos los ve solamente el administrador
 - Las fotos de cada tienda van a su propia carpeta
 
 ---
 
 ## Lo que viene
 
+- Aviso automático de vencimientos por WhatsApp o mail, sin entrar al panel
 - Cobro de suscripciones — el campo `plan` ya está en la base desde el día uno
 - Dominio propio para cada cliente
 - Estadísticas de visitas
